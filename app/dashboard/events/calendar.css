@@ -1,0 +1,72 @@
+/* Custom styles for react-big-calendar */
+.rbc-calendar {
+  width: 100%;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  font-family: inherit;
+}
+
+.rbc-event {
+  /* Remove default background and border, use React for color */
+  background: none;
+  border: none;
+  border-radius: 0.25rem;
+  color: inherit;
+  padding: 0.25rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.rbc-event:hover {
+  filter: brightness(0.95);
+}
+
+.rbc-today {
+  background-color: rgba(59,130,246,0.08); /* Tailwind blue-600 at 8% opacity */
+}
+
+.rbc-header {
+  padding: 0.5rem;
+  font-weight: 600;
+}
+
+.rbc-month-view,
+.rbc-time-view {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+}
+
+.rbc-off-range-bg {
+  background-color: #f7fafc;
+}
+
+.rbc-off-range {
+  color: #a0aec0;
+}
+
+.rbc-show-more {
+  color: #3182ce;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Hide default popup */
+.rbc-overlay {
+  display: none !important;
+}
+
+/* Fix for button styling */
+.rbc-btn-group {
+  display: none;
+}
+
+/* Ensure events are clickable */
+.rbc-event-content {
+  pointer-events: all;
+}
+
+/* Make sure the calendar container is properly sized */
+.rbc-calendar {
+  min-height: 580px;
+}
+
