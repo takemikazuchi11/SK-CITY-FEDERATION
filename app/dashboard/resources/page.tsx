@@ -24,6 +24,8 @@ import {
   getOtherFoldersWithFiles,
   addOtherFolderFile,
   deleteOtherFolderFile,
+  getCityGovernmentFoldersWithFiles,
+  getSKCFFoldersWithFiles,
 } from "@/lib/supabase"
 import { useToast } from "@/components/ui/use-toast"
 import { useAuth } from "@/lib/auth-context"
@@ -106,6 +108,14 @@ export default function Resources() {
   const [selectedOtherFolder, setSelectedOtherFolder] = useState<any | null>(null)
   // Remove General Resources dropdown state and logic from the sidebar
   // Sidebar: General Resources button should just select the section, not toggle a dropdown
+  const [cityGovernmentFolders, setCityGovernmentFolders] = useState<any[]>([])
+  const [selectedCityGovFolder, setSelectedCityGovFolder] = useState<any | null>(null)
+  const [skcfFolders, setSKCFFolders] = useState<any[]>([])
+  const [selectedSKCFFolder, setSelectedSKCFFolder] = useState<any | null>(null)
+  // Add new state for selected section
+  const [selectedSection, setSelectedSection] = useState<'general' | 'citygov' | 'skcf' | null>('general');
+  const [uploadTarget, setUploadTarget] = useState<{ section: 'general' | 'citygov' | 'skcf', folder: any } | null>(null);
+  const [newSectionFile, setNewSectionFile] = useState<{ title: string; fileObject: File | null }>({ title: '', fileObject: null });
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const barangayFileInputRef = useRef<HTMLInputElement>(null)
@@ -202,11 +212,40 @@ export default function Resources() {
     }
   }
 
+  // Fetch city government folders
+  const fetchCityGovernmentFolders = async () => {
+    try {
+      const data = await getCityGovernmentFoldersWithFiles()
+      setCityGovernmentFolders(data)
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch City Government folders.",
+        variant: "destructive",
+      })
+    }
+  }
+  // Fetch SKCF folders
+  const fetchSKCFFolders = async () => {
+    try {
+      const data = await getSKCFFoldersWithFiles()
+      setSKCFFolders(data)
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch SKCF folders.",
+        variant: "destructive",
+      })
+    }
+  }
+
   useEffect(() => {
     fetchResources()
     fetchBarangays()
     fetchBarangayResources()
     fetchOtherFolders()
+    fetchCityGovernmentFolders()
+    fetchSKCFFolders()
 
     // Set up real-time subscription for changes
     const resourcesSubscription = supabase
@@ -577,6 +616,56 @@ export default function Resources() {
     return canEditBarangay(user, barangayName)
   }
 
+  // Add upload logic for SKCF and City Government
+  const handleSectionFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+      setNewSectionFile(prev => ({ ...prev, fileObject: file, title: file.name.split(".")[0] }));
+    }
+  };
+  const handleSectionUpload = async () => {
+    if (!uploadTarget || !newSectionFile.title || !newSectionFile.fileObject) return;
+    const folder = uploadTarget.folder;
+    const file = newSectionFile.fileObject;
+    const fileName = `${Date.now()}_${file.name}`;
+    let uploadPath = '';
+    let table = '';
+    let folderIdField = '';
+    if (uploadTarget.section === 'citygov') {
+      uploadPath = `city_government/${folder.id}/${fileName}`;
+      table = 'city_government_files';
+      folderIdField = 'folder_id';
+    } else if (uploadTarget.section === 'skcf') {
+      uploadPath = `skcf/${folder.id}/${fileName}`;
+      table = 'skcf_files';
+      folderIdField = 'folder_id';
+    } else {
+      return;
+    }
+    try {
+      // Upload to storage
+      const { data: storageData, error: storageError } = await supabase.storage.from('resources').upload(uploadPath, file);
+      if (storageError) throw storageError;
+      const url = supabase.storage.from('resources').getPublicUrl(uploadPath).data.publicUrl;
+      // Insert into table
+      const { error: insertError } = await supabase.from(table).insert({
+        title: newSectionFile.title,
+        type: file.type,
+        url,
+        [folderIdField]: folder.id,
+      });
+      if (insertError) throw insertError;
+      toast({ title: 'Success', description: 'File uploaded successfully!' });
+      setIsUploadDialogOpen(false);
+      setNewSectionFile({ title: '', fileObject: null });
+      setUploadTarget(null);
+      if (uploadTarget.section === 'citygov') fetchCityGovernmentFolders();
+      if (uploadTarget.section === 'skcf') fetchSKCFFolders();
+    } catch (error) {
+      toast({ title: 'Upload failed', description: 'There was an error uploading the file.', variant: 'destructive' });
+    }
+  };
+
   return (
     <div className="min-h-screen py-10">
       <div className="container mx-auto px-4">
@@ -601,50 +690,58 @@ export default function Resources() {
             {/* General Resources Button */}
             <button
               onClick={() => {
-                setSelectedFolder(null)
-                setSelectedOtherFolder(null)
-                setSelectedBarangayId(null)
-                setSelectedMonth("")
+                setSelectedSection('general');
+                setSelectedFolder(null);
+                setSelectedOtherFolder(null);
+                setSelectedBarangayId(null);
+                setSelectedMonth("");
+                setSelectedCityGovFolder(null);
+                setSelectedSKCFFolder(null);
               }}
               className={`flex items-center w-full text-left p-2 rounded-md mb-2 ${
-                !selectedOtherFolder && !selectedBarangayId ? "bg-blue-50 text-blue-600" : "hover:bg-gray-100"
+                selectedSection === 'general' ? "bg-blue-50 text-blue-600" : "hover:bg-gray-100"
               }`}
+              type="button"
             >
               <FileText className="h-4 w-4 mr-2" />
               <span>General Resources</span>
             </button>
-
             {/* City Government Files Button */}
             <button
               onClick={() => {
-                const folder = otherFolders.find((f) => f.name === "City Government Files")
-                if (folder) setSelectedOtherFolder(folder)
-                setSelectedFolder(null)
-                setSelectedBarangayId(null)
-                setSelectedMonth("")
+                setSelectedSection('citygov');
+                setSelectedFolder(null);
+                setSelectedOtherFolder(null);
+                setSelectedBarangayId(null);
+                setSelectedMonth("");
+                setSelectedCityGovFolder(null);
+                setSelectedSKCFFolder(null);
               }}
               className={`flex items-center w-full text-left p-2 rounded-md mb-2 ${
-                selectedOtherFolder && selectedOtherFolder.name === "City Government Files" ? "bg-blue-50 text-blue-600" : "hover:bg-gray-100"
+                selectedSection === 'citygov' ? "bg-blue-50 text-blue-600" : "hover:bg-gray-100"
               }`}
+              type="button"
             >
-              <Folder className="h-4 w-4 mr-2" />
+              <FileText className="h-4 w-4 mr-2" />
               <span>City Government Files</span>
             </button>
-
             {/* SKCF Files Button */}
             <button
               onClick={() => {
-                const folder = otherFolders.find((f) => f.name === "SKCF Files")
-                if (folder) setSelectedOtherFolder(folder)
-                setSelectedFolder(null)
-                setSelectedBarangayId(null)
-                setSelectedMonth("")
+                setSelectedSection('skcf');
+                setSelectedFolder(null);
+                setSelectedOtherFolder(null);
+                setSelectedBarangayId(null);
+                setSelectedMonth("");
+                setSelectedCityGovFolder(null);
+                setSelectedSKCFFolder(null);
               }}
               className={`flex items-center w-full text-left p-2 rounded-md mb-2 ${
-                selectedOtherFolder && selectedOtherFolder.name === "SKCF Files" ? "bg-blue-50 text-blue-600" : "hover:bg-gray-100"
+                selectedSection === 'skcf' ? "bg-blue-50 text-blue-600" : "hover:bg-gray-100"
               }`}
+              type="button"
             >
-              <Folder className="h-4 w-4 mr-2" />
+              <FileText className="h-4 w-4 mr-2" />
               <span>SKCF Files</span>
             </button>
 
@@ -705,7 +802,7 @@ export default function Resources() {
           {/* Main Content */}
           <div className="flex-1">
             {/* General Resources Section */}
-            {!selectedOtherFolder && !selectedBarangayId && (
+            {selectedSection === 'general' && !selectedOtherFolder && !selectedBarangayId && !selectedCityGovFolder && !selectedSKCFFolder && (
               <>
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold">General Resources</h2>
@@ -753,7 +850,7 @@ export default function Resources() {
                               <div className="text-center py-4 text-gray-500">No files in this folder</div>
                             ) : (
                               <div className="space-y-2">
-                                {folder.files.map((file) => (
+                                {folder.files.map((file: any) => (
                                   <div
                                     key={file.id}
                                     className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
@@ -791,17 +888,14 @@ export default function Resources() {
               </>
             )}
 
-            {/* City Government Files & SKCF Files Section */}
-            {selectedOtherFolder && !selectedBarangayId && (
+            {/* City Government Files Section - List Folders */}
+            {selectedSection === 'citygov' && !selectedOtherFolder && !selectedBarangayId && !selectedSKCFFolder && (
               <>
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold">{selectedOtherFolder.name}</h2>
+                  <h2 className="text-xl font-semibold">City Government Files</h2>
                   {user?.user_role === "admin" && (
-                    <Button onClick={() => {
-                      setNewFile((prev) => ({ ...prev, folder: selectedOtherFolder.id.toString() }))
-                      setIsUploadDialogOpen(true)
-                    }}>
-                      <Upload className="mr-2 h-4 w-4" /> Upload {selectedOtherFolder.name}
+                    <Button onClick={() => { setUploadTarget({ section: 'citygov', folder: null }); setIsUploadDialogOpen(true); }}>
+                      <Upload className="mr-2 h-4 w-4" /> Upload File
                     </Button>
                   )}
                 </div>
@@ -809,54 +903,149 @@ export default function Resources() {
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                     <Input
-                      placeholder={`Search ${selectedOtherFolder.name.toLowerCase()}...`}
+                      placeholder="Search folders..."
                       className="pl-10"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
                   </div>
                 </div>
-                {isLoading ? (
-                  <div className="flex justify-center items-center h-40">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-                  </div>
-                ) : selectedOtherFolder.files.filter((file: any) => file.title.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 ? (
-                  <div className="text-center py-10 text-gray-500">No files found</div>
-                ) : (
-                  <div className="space-y-2">
-                    {selectedOtherFolder.files.filter((file: any) => file.title.toLowerCase().includes(searchTerm.toLowerCase())).map((file: any) => (
-                      <div
-                        key={file.id}
-                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                      >
-                        <div className="flex items-center">
-                          <FileText className="h-5 w-5 mr-2 text-blue-600" />
-                          <span>{file.title}</span>
+                <div className="space-y-2">
+                  {cityGovernmentFolders
+                    .filter((folder) => folder.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .map((folder) => (
+                      <div key={folder.id}>
+                        <div
+                          onClick={() => setSelectedCityGovFolder(selectedCityGovFolder && selectedCityGovFolder.id === folder.id ? null : folder)}
+                          className={`border rounded-md p-4 cursor-pointer hover:bg-gray-50 transition-colors flex items-center justify-between ${selectedCityGovFolder && selectedCityGovFolder.id === folder.id ? "bg-blue-50 border-blue-500" : ""}`}
+                        >
+                          <div className="flex items-center">
+                            <Folder className="h-5 w-5 mr-2 text-blue-600" />
+                            <span className="font-medium">{folder.name}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-500">{folder.files.length} files</span>
+                          </div>
                         </div>
-                        <div className="flex items-center">
-                          <span className="text-sm text-gray-500 mr-4">{file.type}</span>
-                          <a
-                            href={file.url}
-                            className="flex items-center text-blue-600 hover:underline mr-4"
-                            download
-                          >
-                            <Download className="h-5 w-5 mr-1" />
-                            Download
-                          </a>
-                          {user?.user_role === "admin" && (
-                            <Button variant="destructive" size="sm" onClick={async () => {
-                              await deleteOtherFolderFile(file.id)
-                              fetchOtherFolders()
-                              toast({ title: "Deleted", description: "File deleted successfully!" })
-                            }}>
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
+                        {/* Show files if this folder is selected */}
+                        {selectedCityGovFolder && selectedCityGovFolder.id === folder.id && (
+                          <div className="mt-2 ml-8">
+                            {folder.files.length === 0 ? (
+                              <div className="text-center py-4 text-gray-500">No files in this folder</div>
+                            ) : (
+                              <div className="space-y-2">
+                                {folder.files.map((file: any) => (
+                                  <div
+                                    key={file.id}
+                                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                                  >
+                                    <div className="flex items-center">
+                                      <FileText className="h-5 w-5 mr-2 text-blue-600" />
+                                      <span>{file.title}</span>
+                                    </div>
+                                    <div className="flex items-center">
+                                      <span className="text-sm text-gray-500 mr-4">{file.type}</span>
+                                      <a
+                                        href={file.url}
+                                        className="flex items-center text-blue-600 hover:underline mr-4"
+                                        download
+                                      >
+                                        <Download className="h-5 w-5 mr-1" />
+                                        Download
+                                      </a>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     ))}
+                  {cityGovernmentFolders.length === 0 && (
+                    <div className="text-center py-10 text-gray-500">No folders found</div>
+                  )}
+                </div>
+              </>
+            )}
+            {/* SKCF Files Section - List Folders */}
+            {selectedSection === 'skcf' && !selectedOtherFolder && !selectedBarangayId && !selectedCityGovFolder && (
+              <>
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-semibold">SKCF Files</h2>
+                  {user?.user_role === "admin" && (
+                    <Button onClick={() => { setUploadTarget({ section: 'skcf', folder: null }); setIsUploadDialogOpen(true); }}>
+                      <Upload className="mr-2 h-4 w-4" /> Upload File
+                    </Button>
+                  )}
+                </div>
+                <div className="mb-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <Input
+                      placeholder="Search folders..."
+                      className="pl-10"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                   </div>
-                )}
+                </div>
+                <div className="space-y-2">
+                  {skcfFolders
+                    .filter((folder) => folder.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .map((folder) => (
+                      <div key={folder.id}>
+                        <div
+                          onClick={() => setSelectedSKCFFolder(selectedSKCFFolder && selectedSKCFFolder.id === folder.id ? null : folder)}
+                          className={`border rounded-md p-4 cursor-pointer hover:bg-gray-50 transition-colors flex items-center justify-between ${selectedSKCFFolder && selectedSKCFFolder.id === folder.id ? "bg-blue-50 border-blue-500" : ""}`}
+                        >
+                          <div className="flex items-center">
+                            <Folder className="h-5 w-5 mr-2 text-blue-600" />
+                            <span className="font-medium">{folder.name}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-500">{folder.files.length} files</span>
+                          </div>
+                        </div>
+                        {/* Show files if this folder is selected */}
+                        {selectedSKCFFolder && selectedSKCFFolder.id === folder.id && (
+                          <div className="mt-2 ml-8">
+                            {folder.files.length === 0 ? (
+                              <div className="text-center py-4 text-gray-500">No files in this folder</div>
+                            ) : (
+                              <div className="space-y-2">
+                                {folder.files.map((file: any) => (
+                                  <div
+                                    key={file.id}
+                                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                                  >
+                                    <div className="flex items-center">
+                                      <FileText className="h-5 w-5 mr-2 text-blue-600" />
+                                      <span>{file.title}</span>
+                                    </div>
+                                    <div className="flex items-center">
+                                      <span className="text-sm text-gray-500 mr-4">{file.type}</span>
+                                      <a
+                                        href={file.url}
+                                        className="flex items-center text-blue-600 hover:underline mr-4"
+                                        download
+                                      >
+                                        <Download className="h-5 w-5 mr-1" />
+                                        Download
+                                      </a>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  {skcfFolders.length === 0 && (
+                    <div className="text-center py-10 text-gray-500">No folders found</div>
+                  )}
+                </div>
               </>
             )}
 
@@ -868,7 +1057,13 @@ export default function Resources() {
                     {barangayResources.barangayMapping[selectedBarangayId] || "Barangay"} Resources
                   </h2>
                   {canManageBarangay(selectedBarangayId) && (
-                    <Button onClick={() => setIsBarangayUploadDialogOpen(true)}>
+                    <Button onClick={() => {
+                      setNewBarangayFile((prev) => ({
+                        ...prev,
+                        barangayId: selectedBarangayId || null,
+                      }));
+                      setIsBarangayUploadDialogOpen(true);
+                    }}>
                       <Upload className="mr-2 h-4 w-4" /> Upload Barangay Resources
                     </Button>
                   )}
@@ -1059,7 +1254,7 @@ export default function Resources() {
                     <SelectTrigger className="col-span-3">
                       <SelectValue placeholder="Select barangay" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent style={{ zIndex: 9999 }}>
                       {barangays.map((barangay) => (
                         <SelectItem key={barangay.id} value={barangay.id.toString()}>
                           {barangay.name}
@@ -1111,6 +1306,76 @@ export default function Resources() {
                   "Upload"
                 )}
               </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Upload Dialog for SKCF and City Government */}
+        <Dialog open={isUploadDialogOpen && uploadTarget?.section === 'citygov'} onOpenChange={setIsUploadDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Upload Resource</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="citygov-file" className="text-right">File</Label>
+                <Input id="citygov-file" type="file" onChange={handleSectionFileSelect} className="col-span-3" />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="citygov-title" className="text-right">Title</Label>
+                <Input id="citygov-title" value={newSectionFile.title} onChange={e => setNewSectionFile(prev => ({ ...prev, title: e.target.value }))} className="col-span-3" />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="citygov-folder" className="text-right">Folder</Label>
+                <Select value={uploadTarget?.folder?.id ? String(uploadTarget.folder.id) : ''} onValueChange={value => setUploadTarget(uploadTarget && { ...uploadTarget, folder: cityGovernmentFolders.find(f => f.id === Number(value)) })}>
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select folder" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cityGovernmentFolders.map(folder => (
+                      <SelectItem key={folder.id} value={String(folder.id)}>{folder.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsUploadDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleSectionUpload} disabled={!newSectionFile.fileObject || !uploadTarget?.folder}>{isUploading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Uploading...</>) : ("Upload")}</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+        <Dialog open={isUploadDialogOpen && uploadTarget?.section === 'skcf'} onOpenChange={setIsUploadDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Upload Resource</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="skcf-file" className="text-right">File</Label>
+                <Input id="skcf-file" type="file" onChange={handleSectionFileSelect} className="col-span-3" />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="skcf-title" className="text-right">Title</Label>
+                <Input id="skcf-title" value={newSectionFile.title} onChange={e => setNewSectionFile(prev => ({ ...prev, title: e.target.value }))} className="col-span-3" />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="skcf-folder" className="text-right">Folder</Label>
+                <Select value={uploadTarget?.folder?.id ? String(uploadTarget.folder.id) : ''} onValueChange={value => setUploadTarget(uploadTarget && { ...uploadTarget, folder: skcfFolders.find(f => f.id === Number(value)) })}>
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select folder" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {skcfFolders.map(folder => (
+                      <SelectItem key={folder.id} value={String(folder.id)}>{folder.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsUploadDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleSectionUpload} disabled={!newSectionFile.fileObject || !uploadTarget?.folder}>{isUploading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Uploading...</>) : ("Upload")}</Button>
             </div>
           </DialogContent>
         </Dialog>

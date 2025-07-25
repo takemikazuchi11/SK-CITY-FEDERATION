@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth-context"
 import { hasPermission } from "@/lib/role-based-access"
 import SK from "@/public/SK-Logo.jpg"
 import CALAP from "@/public/calap.png"
+import SPC from "@/public/SPC.jpg"
 
 export default function BarangayManagementPage() {
   const [selectedBarangayId, setSelectedBarangayId] = useState<number | null>(null)
@@ -33,6 +34,9 @@ export default function BarangayManagementPage() {
         <div className="absolute top-0 right-0 flex space-x-2">
           <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
             <Image src={SK || "/placeholder.svg"} alt="Logo 1" width={100} height={100} />
+          </div>
+          <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+            <Image src={SPC || "/placeholder.svg"} alt="Logo 1" width={100} height={100} />
           </div>
           <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
             <Image src={CALAP || "/placeholder.svg"} alt="Logo 1" width={100} height={100} />

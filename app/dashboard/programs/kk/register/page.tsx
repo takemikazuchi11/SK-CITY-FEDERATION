@@ -376,11 +376,8 @@ export default function KKRegistrationPage() {
                                     setDateInputValue("")
                                   }
                                 }}
-                                disabled={(date) => {
-                                  const today = new Date()
-                                  const age = today.getFullYear() - date.getFullYear()
-                                  return age < 15 || age > 30
-                                }}
+                                captionLayout="dropdown"
+                                defaultMonth={new Date(2000, 0, 1)}
                                 initialFocus
                               />
                             </PopoverContent>

@@ -14,6 +14,7 @@ import "./calendar.css"
 import Image from "next/image"
 import SK from "@/public/SK-Logo.jpg"
 import CALAP from "@/public/calap.png"
+import SPC from "@/public/SPC.jpg"
 
 // Setup the localizer for react-big-calendar
 const localizer = momentLocalizer(moment)
@@ -166,6 +167,10 @@ export default function EventsPage() {
         </div>
 
         <div className="flex justify-center">
+          <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-2 border-blue-600">
+            <Image src={SPC || "/placeholder.svg"} alt="Logo 3" width={64} height={64} className="object-cover" />
+          </div>
+          <div> &nbsp;</div>
           <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-2 border-blue-600">
             <Image src={CALAP || "/placeholder.svg"} alt="Logo 3" width={64} height={64} className="object-cover" />
           </div>

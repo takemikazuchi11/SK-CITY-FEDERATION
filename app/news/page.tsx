@@ -87,6 +87,22 @@ export default function AllNewsPage() {
     })
   }
 
+  // Add category color mapping
+  const CATEGORY_COLORS: Record<string, string> = {
+    "Governance & Public Service": "bg-blue-600 text-white",
+    "Employment & Livelihood": "bg-green-600 text-white",
+    "Youth & Education": "bg-yellow-500 text-white",
+    "Culture & Arts": "bg-pink-500 text-white",
+    "Health & Wellness": "bg-red-500 text-white",
+    "Disaster Response & Safety": "bg-orange-600 text-white",
+    "Sports & Recreation": "bg-teal-600 text-white",
+    "Environment & Agriculture": "bg-lime-600 text-white",
+    "Technology & Innovation": "bg-cyan-600 text-white",
+    "Peace & Order": "bg-indigo-600 text-white",
+    "Community Events": "bg-gray-600 text-white",
+    "Infrastructure & Development": "bg-amber-700 text-white",
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen">
@@ -204,9 +220,9 @@ export default function AllNewsPage() {
                     )}
                     <CardContent className="p-6 flex flex-col h-full">
                       <div className="flex items-center gap-2 mb-3">
-                        <Badge variant="secondary" className="capitalize">
+                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold capitalize shadow ${CATEGORY_COLORS[article.category] || 'bg-gray-300 text-gray-800'}`}>
                           {article.category.replace("-", " ")}
-                        </Badge>
+                        </span>
                         <div className="flex items-center text-sm text-red-600 font-semibold">
                           <Calendar className="h-3 w-3 mr-1" />
                           {formatDate(article.published_at)}

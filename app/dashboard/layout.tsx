@@ -7,6 +7,7 @@ import Footer from "@/components/Footer"
 import DashboardNavbar from "@/components/dashboard/Navbar"
 import { useAuth } from "@/lib/auth-context"
 import { generateAllNotifications } from "@/lib/notification-service"
+import Image from "next/image"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()

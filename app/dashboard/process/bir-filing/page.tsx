@@ -19,6 +19,7 @@ import {
 } from "lucide-react"
 import SK from "@/public/SK-Logo.jpg"
 import CALAP from "@/public/calap.png"
+import SPC from "@/public/SPC.jpg"
 
 export default function BIRFilingPage() {
   const [activeTab, setActiveTab] = useState("registration")
@@ -56,7 +57,10 @@ export default function BIRFilingPage() {
             <Image src={SK || "/placeholder.svg"} alt="SK Logo" width={100} height={100} />
           </div>
           <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-            <Image src={CALAP || "/placeholder.svg"} alt="BIR Logo" width={100} height={100} />
+            <Image src={SPC || "/placeholder.svg"} alt="SPC Logo" width={100} height={100} />
+          </div>
+          <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+            <Image src={CALAP || "/placeholder.svg"} alt="Calap Logo" width={100} height={100} />
           </div>
         </div>
       </div>

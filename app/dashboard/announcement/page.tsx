@@ -89,7 +89,7 @@ export default function AnnouncementsPage() {
           <div className="bg-red-600 text-white px-12 py-3 text-3xl font-bold text-center shadow-md mb-3" style={{display: 'inline-block'}}>
             Announcements
           </div>
-          <p className="text-gray-500 mt-1">Stay updated with the latest news and announcements</p>
+          <p className="text-gray-500 mt-1">Stay updated with the latest polls and announcements</p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">

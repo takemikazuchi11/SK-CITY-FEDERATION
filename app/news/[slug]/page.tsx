@@ -30,6 +30,7 @@ import DashboardNavbar from "@/components/dashboard/Navbar"
 import { use } from "react"
 import { usePathname } from "next/navigation"
 import { Tooltip } from "@/components/ui/tooltip"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface NewsArticlePageProps {
   params: {
@@ -135,6 +136,22 @@ export default function NewsArticlePage({ params }: NewsArticlePageProps) {
     navigator.clipboard.writeText(shareUrl);
     toast.success("Link copied to clipboard!");
   };
+
+  // Add category options (should match add news form)
+  const CATEGORY_OPTIONS = [
+    "Governance & Public Service",
+    "Employment & Livelihood",
+    "Youth & Education",
+    "Culture & Arts",
+    "Health & Wellness",
+    "Disaster Response & Safety",
+    "Sports & Recreation",
+    "Environment & Agriculture",
+    "Technology & Innovation",
+    "Peace & Order",
+    "Community Events",
+    "Infrastructure & Development",
+  ];
 
   if (loading) {
     return (
@@ -314,12 +331,19 @@ export default function NewsArticlePage({ params }: NewsArticlePageProps) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="edit-category">Category</Label>
-                <Input
-                  id="edit-category"
+                <Select
                   value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  placeholder="e.g., Announcements, Events"
-                />
+                  onValueChange={(value) => setFormData({ ...formData, category: value })}
+                >
+                  <SelectTrigger id="edit-category">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CATEGORY_OPTIONS.map((option) => (
+                      <SelectItem key={option} value={option}>{option}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>

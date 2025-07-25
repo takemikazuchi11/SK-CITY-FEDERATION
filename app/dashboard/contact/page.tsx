@@ -4,160 +4,24 @@ import Link from "next/link"
 import { ArrowLeft, Phone, Mail, MapPin, Clock } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-
-interface ContactInfo {
-  name: string
-  fullName: string
-  category: string
-  phone?: string
-  email?: string
-  address: string
-  hours?: string
-  description: string
-}
-
-const contactData: ContactInfo[] = [
-  {
-    name: "NYC",
-    fullName: "National Youth Commission",
-    category: "National Agency",
-    phone: "(043) 286-8234",
-    email: "nyc.mimaropa@gmail.com",
-    address: "Provincial Capitol Complex, Calapan City, Oriental Mindoro",
-    hours: "8:00 AM - 5:00 PM (Mon-Fri)",
-    description: "Promotes youth development and empowerment programs",
-  },
-  {
-    name: "COA",
-    fullName: "Commission on Audit",
-    category: "Constitutional Body",
-    phone: "(043) 286-2156",
-    email: "coa.orientalmindoro@gmail.com",
-    address: "Provincial Capitol Complex, Calapan City, Oriental Mindoro",
-    hours: "8:00 AM - 5:00 PM (Mon-Fri)",
-    description: "Government auditing and financial oversight services",
-  },
-  {
-    name: "BIR",
-    fullName: "Bureau of Internal Revenue",
-    category: "National Agency",
-    phone: "(043) 286-2345",
-    email: "bir.calapan@bir.gov.ph",
-    address: "BIR Building, J.P. Rizal Street, Calapan City, Oriental Mindoro",
-    hours: "8:00 AM - 5:00 PM (Mon-Fri)",
-    description: "Tax collection and revenue services",
-  },
-  {
-    name: "LANDBANK",
-    fullName: "Land Bank of the Philippines",
-    category: "Government Bank",
-    phone: "(043) 286-3456",
-    email: "calapan@landbank.com",
-    address: "Landbank Building, Magsaysay Street, Calapan City, Oriental Mindoro",
-    hours: "9:00 AM - 3:00 PM (Mon-Fri)",
-    description: "Agricultural and development banking services",
-  },
-  {
-    name: "DBP",
-    fullName: "Development Bank of the Philippines",
-    category: "Government Bank",
-    phone: "(043) 286-4567",
-    email: "calapan.branch@dbp.ph",
-    address: "DBP Building, Bonifacio Street, Calapan City, Oriental Mindoro",
-    hours: "9:00 AM - 3:00 PM (Mon-Fri)",
-    description: "Development financing and banking services",
-  },
-  {
-    name: "COMELEC",
-    fullName: "Commission on Elections",
-    category: "Constitutional Body",
-    phone: "(043) 286-5678",
-    email: "comelec.orientalmindoro@gmail.com",
-    address: "COMELEC Office, Provincial Capitol Complex, Calapan City, Oriental Mindoro",
-    hours: "8:00 AM - 5:00 PM (Mon-Fri)",
-    description: "Election administration and voter registration services",
-  },
-  {
-    name: "LGU",
-    fullName: "Local Government Unit - Calapan City",
-    category: "Local Government",
-    phone: "(043) 286-7890",
-    email: "lgu.calapan@gmail.com",
-    address: "Calapan City Hall, Magsaysay Avenue, Calapan City, Oriental Mindoro",
-    hours: "8:00 AM - 5:00 PM (Mon-Fri)",
-    description: "Local government services and administration",
-  },
-  {
-    name: "CITY GOV",
-    fullName: "Calapan City Government",
-    category: "Local Government",
-    phone: "(043) 286-8901",
-    email: "mayor.calapan@gmail.com",
-    address: "Office of the City Mayor, Calapan City Hall, Calapan City, Oriental Mindoro",
-    hours: "8:00 AM - 5:00 PM (Mon-Fri)",
-    description: "City executive office and administrative services",
-  },
-  {
-    name: "SK FEDERATION",
-    fullName: "Sangguniang Kabataan Federation",
-    category: "Youth Organization",
-    phone: "(043) 286-9012",
-    email: "sk.federation.calapan@gmail.com",
-    address: "SK Federation Office, Calapan City Hall, Calapan City, Oriental Mindoro",
-    hours: "8:00 AM - 5:00 PM (Mon-Fri)",
-    description: "Youth council federation and youth programs",
-  },
-  {
-    name: "SANGGUNIAN PANGLUSOD",
-    fullName: "Sangguniang Panlungsod ng Calapan",
-    category: "Local Government",
-    phone: "(043) 286-0123",
-    email: "sanggunian.calapan@gmail.com",
-    address: "Session Hall, Calapan City Hall, Calapan City, Oriental Mindoro",
-    hours: "8:00 AM - 5:00 PM (Mon-Fri)",
-    description: "City council legislative body and ordinance creation",
-  },
-  {
-    name: "CITY POLICE",
-    fullName: "Calapan City Police Station",
-    category: "Law Enforcement",
-    phone: "(043) 286-1234 / 911",
-    email: "calapan.police@pnp.gov.ph",
-    address: "Calapan City Police Station, J.P. Rizal Street, Calapan City, Oriental Mindoro",
-    hours: "24/7 Emergency Services",
-    description: "Law enforcement and public safety services",
-  },
-  {
-    name: "BFP CALAPAN",
-    fullName: "Bureau of Fire Protection - Calapan",
-    category: "Emergency Services",
-    phone: "(043) 286-2345 / 911",
-    email: "bfp.calapan@bfp.gov.ph",
-    address: "BFP Calapan Fire Station, Magsaysay Avenue, Calapan City, Oriental Mindoro",
-    hours: "24/7 Emergency Services",
-    description: "Fire prevention, suppression, and emergency response",
-  },
-  {
-    name: "CITY HEALTH",
-    fullName: "Calapan City Health Office",
-    category: "Health Services",
-    phone: "(043) 286-3456",
-    email: "health.calapan@gmail.com",
-    address: "City Health Office, Calapan City Hall Complex, Calapan City, Oriental Mindoro",
-    hours: "8:00 AM - 5:00 PM (Mon-Fri)",
-    description: "Public health services and medical assistance programs",
-  },
-  {
-    name: "CDRRMO",
-    fullName: "City Disaster Risk Reduction and Management Office",
-    category: "Emergency Services",
-    phone: "(043) 286-4567 / 911",
-    email: "cdrrmo.calapan@gmail.com",
-    address: "CDRRMO Office, Calapan City Hall Complex, Calapan City, Oriental Mindoro",
-    hours: "24/7 Emergency Response",
-    description: "Disaster preparedness, response, and risk reduction management",
-  },
-]
+import { useEffect, useState } from "react"
+import { getContacts, addContact, updateContact, deleteContact, ContactInfo } from "@/lib/contact-service"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useToast } from "@/components/ui/use-toast"
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog"
 
 const categoryColors = {
   "National Agency": "bg-blue-100 text-blue-800",
@@ -170,8 +34,98 @@ const categoryColors = {
   "Health Services": "bg-teal-100 text-teal-800",
 }
 
+const isAdmin = true // TODO: Replace with real admin check
+
 export default function ContactPage() {
-  const categories = Array.from(new Set(contactData.map((contact) => contact.category)))
+  const [contacts, setContacts] = useState<ContactInfo[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [showDialog, setShowDialog] = useState(false)
+  const [editingContact, setEditingContact] = useState<ContactInfo | null>(null)
+  const [form, setForm] = useState<ContactInfo>({
+    name: "",
+    fullName: "",
+    category: "",
+    phone: "",
+    email: "",
+    address: "",
+    hours: "",
+    description: "",
+  })
+  const { toast } = useToast()
+  const [pendingDelete, setPendingDelete] = useState<ContactInfo | null>(null)
+
+  useEffect(() => {
+    fetchContacts()
+  }, [])
+
+  async function fetchContacts() {
+    setLoading(true)
+    setError(null)
+    try {
+      const data = await getContacts()
+      setContacts(data)
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function openAddDialog() {
+    setEditingContact(null)
+    setForm({
+      name: "",
+      fullName: "",
+      category: "",
+      phone: "",
+      email: "",
+      address: "",
+      hours: "",
+      description: "",
+    })
+    setShowDialog(true)
+  }
+
+  function openEditDialog(contact: ContactInfo) {
+    setEditingContact(contact)
+    setForm(contact)
+    setShowDialog(true)
+  }
+
+  async function handleSave() {
+    try {
+      if (editingContact && editingContact.id) {
+        await updateContact({ ...form, id: editingContact.id })
+        toast({ title: "Contact updated!", description: `${form.name} was updated successfully.` })
+      } else {
+        await addContact(form)
+        toast({ title: "Contact added!", description: `${form.name} was added successfully.` })
+      }
+      setShowDialog(false)
+      fetchContacts()
+    } catch (e: any) {
+      let msg = e.message || "An error occurred."
+      if (msg.includes("fullName")) {
+        msg = "Database error: Could not find the 'fullName' column. Please check your database column name. It should be 'fullname' (all lowercase) or update your code to match the database.";
+      }
+      toast({ title: "Error", description: msg, variant: "destructive" })
+    }
+  }
+
+  async function handleDelete(id: number | undefined) {
+    if (!id) return
+    try {
+      await deleteContact(id)
+      toast({ title: "Contact deleted!", description: `Contact was deleted successfully.` })
+      fetchContacts()
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message || "An error occurred.", variant: "destructive" })
+    }
+    setPendingDelete(null)
+  }
+
+  const categories = Array.from(new Set(contacts.map((contact) => contact.category)))
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -185,6 +139,9 @@ export default function ContactPage() {
                 Back to Home
               </Link>
             </div>
+            {isAdmin && (
+              <Button onClick={openAddDialog} className="ml-4">Add Contact</Button>
+            )}
           </div>
           <div className="mt-4">
             <h1 className="text-3xl font-bold text-gray-900">Contact Us</h1>
@@ -216,82 +173,91 @@ export default function ContactPage() {
           </div>
         </div>
 
-        {/* Contact Cards by Category */}
-        {categories.map((category) => (
-          <div key={category} id={category.replace(/\s+/g, "-").toLowerCase()} className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b-2 border-blue-200 pb-2">{category}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {contactData
-                .filter((contact) => contact.category === category)
-                .map((contact, index) => (
-                  <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <CardTitle className="text-lg font-bold text-gray-900">{contact.name}</CardTitle>
-                          <p className="text-sm text-gray-600 mt-1">{contact.fullName}</p>
-                        </div>
-                        <Badge className={categoryColors[category as keyof typeof categoryColors]}>
-                          {contact.category}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <p className="text-sm text-gray-700">{contact.description}</p>
-
-                      {/* Contact Information */}
-                      <div className="space-y-3">
-                        {contact.phone && (
-                          <div className="flex items-start space-x-3">
-                            <Phone className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+        {loading ? (
+          <div className="text-center py-10 text-gray-500">Loading contacts...</div>
+        ) : error ? (
+          <div className="text-center py-10 text-red-500">{error}</div>
+        ) : (
+          <>
+            {/* Contact Cards by Category */}
+            {categories.map((category) => (
+              <div key={category} id={category.replace(/\s+/g, "-").toLowerCase()} className="mb-12">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b-2 border-blue-200 pb-2">{category}</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {contacts
+                    .filter((contact) => contact.category === category)
+                    .map((contact, index) => (
+                      <Card key={contact.id || index} className="hover:shadow-lg transition-shadow duration-200">
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between">
                             <div>
-                              <p className="text-sm font-medium text-gray-900">Phone</p>
-                              <a href={`tel:${contact.phone}`} className="text-sm text-blue-600 hover:text-blue-800">
-                                {contact.phone}
-                              </a>
+                              <CardTitle className="text-lg font-bold text-gray-900">{contact.name}</CardTitle>
+                              <p className="text-sm text-gray-600 mt-1">{contact.fullName}</p>
                             </div>
+                            <Badge className={categoryColors[category as keyof typeof categoryColors]}>
+                              {contact.category}
+                            </Badge>
                           </div>
-                        )}
-
-                        {contact.email && (
-                          <div className="flex items-start space-x-3">
-                            <Mail className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                            <div>
-                              <p className="text-sm font-medium text-gray-900">Email</p>
-                              <a
-                                href={`mailto:${contact.email}`}
-                                className="text-sm text-blue-600 hover:text-blue-800 break-all"
-                              >
-                                {contact.email}
-                              </a>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <p className="text-sm text-gray-700">{contact.description}</p>
+                          <div className="space-y-3">
+                            {contact.phone && (
+                              <div className="flex items-start space-x-3">
+                                <Phone className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                                <div>
+                                  <p className="text-sm font-medium text-gray-900">Phone</p>
+                                  <a href={`tel:${contact.phone}`} className="text-sm text-blue-600 hover:text-blue-800">
+                                    {contact.phone}
+                                  </a>
+                                </div>
+                              </div>
+                            )}
+                            {contact.email && (
+                              <div className="flex items-start space-x-3">
+                                <Mail className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                                <div>
+                                  <p className="text-sm font-medium text-gray-900">Email</p>
+                                  <a
+                                    href={`mailto:${contact.email}`}
+                                    className="text-sm text-blue-600 hover:text-blue-800 break-all"
+                                  >
+                                    {contact.email}
+                                  </a>
+                                </div>
+                              </div>
+                            )}
+                            <div className="flex items-start space-x-3">
+                              <MapPin className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">Address</p>
+                                <p className="text-sm text-gray-700">{contact.address}</p>
+                              </div>
                             </div>
+                            {contact.hours && (
+                              <div className="flex items-start space-x-3">
+                                <Clock className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                                <div>
+                                  <p className="text-sm font-medium text-gray-900">Office Hours</p>
+                                  <p className="text-sm text-gray-700">{contact.hours}</p>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                        )}
-
-                        <div className="flex items-start space-x-3">
-                          <MapPin className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">Address</p>
-                            <p className="text-sm text-gray-700">{contact.address}</p>
-                          </div>
-                        </div>
-
-                        {contact.hours && (
-                          <div className="flex items-start space-x-3">
-                            <Clock className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                            <div>
-                              <p className="text-sm font-medium text-gray-900">Office Hours</p>
-                              <p className="text-sm text-gray-700">{contact.hours}</p>
+                          {isAdmin && (
+                            <div className="flex gap-2 mt-4">
+                              <Button size="sm" variant="outline" onClick={() => openEditDialog(contact)}>Edit</Button>
+                              <Button size="sm" variant="destructive" onClick={() => setPendingDelete(contact)}>Delete</Button>
                             </div>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-            </div>
-          </div>
-        ))}
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                </div>
+              </div>
+            ))}
+          </>
+        )}
 
         {/* Emergency Contacts Section */}
         <div className="mt-12 bg-red-50 border border-red-200 rounded-lg p-6">
@@ -332,6 +298,60 @@ export default function ContactPage() {
           </ul>
         </div>
       </div>
+
+      {/* Add/Edit Dialog */}
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        <DialogContent className="max-w-lg w-full sm:max-w-xl md:max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl border border-gray-200">
+          <DialogHeader>
+            <DialogTitle>{editingContact ? "Edit Contact" : "Add Contact"}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={e => { e.preventDefault(); handleSave(); }}>
+            <div className="grid gap-4 py-4">
+              <Input autoFocus placeholder="Name" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+              <Input placeholder="Full Name" value={form.fullName} onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))} />
+              <Select value={form.category} onValueChange={value => setForm(f => ({ ...f, category: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Input placeholder="Phone" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
+                <Input placeholder="Email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
+              </div>
+              <Input placeholder="Address" value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Input placeholder="Hours" value={form.hours} onChange={e => setForm(f => ({ ...f, hours: e.target.value }))} />
+                <Input placeholder="Description" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" type="button" onClick={() => setShowDialog(false)}>Cancel</Button>
+              <Button type="submit">{editingContact ? "Update" : "Add"}</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!pendingDelete} onOpenChange={open => { if (!open) setPendingDelete(null) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Contact</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <b>{pendingDelete?.name}</b>? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPendingDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => handleDelete(pendingDelete?.id)}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

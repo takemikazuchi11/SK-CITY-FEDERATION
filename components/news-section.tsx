@@ -47,6 +47,22 @@ export default function NewsSection() {
     "Infrastructure & Development",
   ]
 
+  // Add category color mapping
+  const CATEGORY_COLORS: Record<string, string> = {
+    "Governance & Public Service": "bg-blue-600 text-white",
+    "Employment & Livelihood": "bg-green-600 text-white",
+    "Youth & Education": "bg-yellow-500 text-white",
+    "Culture & Arts": "bg-pink-500 text-white",
+    "Health & Wellness": "bg-red-500 text-white",
+    "Disaster Response & Safety": "bg-orange-600 text-white",
+    "Sports & Recreation": "bg-teal-600 text-white",
+    "Environment & Agriculture": "bg-lime-600 text-white",
+    "Technology & Innovation": "bg-cyan-600 text-white",
+    "Peace & Order": "bg-indigo-600 text-white",
+    "Community Events": "bg-gray-600 text-white",
+    "Infrastructure & Development": "bg-amber-700 text-white",
+  };
+
   useEffect(() => {
     fetchNews()
   }, [])
@@ -137,7 +153,11 @@ export default function NewsSection() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {news.map((article) => (
               <Link key={article.id} href={`/news/${article.slug}`} onClick={() => setLoading(true)}>
-                <Card className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer h-full">
+                <Card className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer h-full relative">
+                  {/* Category badge at top right */}
+                  <span className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-semibold capitalize shadow z-10 ${CATEGORY_COLORS[article.category] || 'bg-gray-300 text-gray-800'}`}>
+                    {article.category.replace("-", " ")}
+                  </span>
                   {article.featured_image_url && (
                     <div className="aspect-[16/10] relative">
                       <img

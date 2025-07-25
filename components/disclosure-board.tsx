@@ -231,9 +231,6 @@ export default function DisclosureBoard() {
             </CardContent>
           </Card>
         </div>
-        <div className="mt-8 flex justify-center">
-          <AddArchivesButton />
-        </div>
       </div>
     </section>
   )

@@ -807,6 +807,58 @@ export async function deleteOtherFolderFile(id: number) {
   return true;
 }
 
+// Fetch all city government folders with their files
+export async function getCityGovernmentFoldersWithFiles() {
+  const { data, error } = await supabase
+    .from('city_government_folders')
+    .select(`
+      id,
+      name,
+      city_government_files (
+        id,
+        title,
+        type,
+        url,
+        created_at
+      )
+    `)
+    .order('name');
+
+  if (error) throw error;
+
+  return (data || []).map((folder: any) => ({
+    id: folder.id,
+    name: folder.name,
+    files: folder.city_government_files || [],
+  }));
+}
+
+// Fetch all SKCF folders with their files
+export async function getSKCFFoldersWithFiles() {
+  const { data, error } = await supabase
+    .from('skcf_folders')
+    .select(`
+      id,
+      name,
+      skcf_files (
+        id,
+        title,
+        type,
+        url,
+        created_at
+      )
+    `)
+    .order('name');
+
+  if (error) throw error;
+
+  return (data || []).map((folder: any) => ({
+    id: folder.id,
+    name: folder.name,
+    files: folder.skcf_files || [],
+  }));
+}
+
 export async function hasUserLikedAnnouncement(announcementId: string, userId: string) {
   const { data, error } = await supabase
     .from("announcement_likes")

@@ -434,36 +434,46 @@ export default function AnnouncementDetail() {
         </CardContent>
         <CardFooter className="flex justify-between">
           {user ? (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={hasLiked ? "text-blue-600" : "text-muted-foreground"}
-                    onClick={handleLike}
-                    aria-pressed={hasLiked}
-                  >
-                    <ThumbsUp className="mr-1 h-4 w-4" />
-                    {likeCount} {hasLiked ? "Liked" : "Like"}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="top" align="center">
-                  {likeUsers.length === 0 ? (
-                    <span>No likes yet</span>
-                  ) : (
-                    <div className="text-sm">
-                      <div className="font-semibold mb-1">Liked by:</div>
-                      <ul>
-                        {likeUsers.map((u) => (
-                          <li key={u.id}>{u.first_name} {u.last_name}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <div className="flex w-full justify-between items-center">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={hasLiked ? "text-blue-600" : "text-muted-foreground"}
+                      onClick={handleLike}
+                      aria-pressed={hasLiked}
+                    >
+                      <ThumbsUp className="mr-1 h-4 w-4" />
+                      {likeCount} {hasLiked ? "Liked" : "Like"}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" align="center">
+                    {likeUsers.length === 0 ? (
+                      <span>No likes yet</span>
+                    ) : (
+                      <div className="text-sm">
+                        <div className="font-semibold mb-1">Liked by:</div>
+                        <ul>
+                          {likeUsers.map((u) => (
+                            <li key={u.id}>{u.first_name} {u.last_name}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <Button
+                size="sm"
+                variant="outline"
+                className="ml-auto"
+                onClick={() => setShowCommentForm((prev) => !prev)}
+              >
+                {showCommentForm ? "Cancel" : "Add Comment"}
+              </Button>
+            </div>
           ) : (
             <span className="text-muted-foreground text-sm">Log in to like or comment</span>
           )}
@@ -480,13 +490,7 @@ export default function AnnouncementDetail() {
         <Card className="mb-8" id="comment-form">
           <CardContent className="pt-4 pb-2">
             {user ? (
-              !showCommentForm ? (
-                <div className="flex justify-center">
-                  <Button size="sm" variant="outline" onClick={() => setShowCommentForm(true)}>
-                    Add New Comment
-                  </Button>
-                </div>
-              ) : (
+              showCommentForm ? (
                 <form onSubmit={handleSubmitComment}>
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2 mb-2">
@@ -519,7 +523,7 @@ export default function AnnouncementDetail() {
                     </div>
                   </div>
                 </form>
-              )
+              ) : null
             ) : (
               <div className="text-center text-muted-foreground py-8">
                 <p>Please create an account to comment on the announcement.</p>

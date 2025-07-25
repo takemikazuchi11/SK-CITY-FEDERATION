@@ -14,6 +14,7 @@ import { toast } from "sonner"
 import { PermissionGuard } from "@/components/role-based-ui"
 import SK from "@/public/SK-Logo.jpg"
 import CALAP from "@/public/calap.png"
+import SPC from "@/public/SPC.jpg"
 
 interface Official {
   id: number
@@ -140,7 +141,7 @@ export function FederationOrgChart() {
               <Image src={SK || "/placeholder.svg"} alt="Logo 1" width={100} height={100} className="rounded-full" />
             </div>
             <div className="w-24 h-24 rounded-full bg-white p-2 border-2 border-blue-600">
-              <Image src={CALAP || "/placeholder.svg"} alt="Logo 2" width={100} height={100} className="rounded-full" />
+              <Image src={SPC || "/placeholder.svg"} alt="Logo 2" width={100} height={100} className="rounded-full" />
             </div>
             <div className="w-24 h-24 rounded-full bg-white p-2 border-2 border-blue-600">
               <Image src={CALAP || "/placeholder.svg"} alt="Logo 3" width={200} height={200} className="rounded-full" />

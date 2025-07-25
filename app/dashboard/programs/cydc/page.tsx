@@ -11,19 +11,15 @@ export default function KatipunanKabataanPage() {
 
   // Sample CYDC group names for the carousel
   const cydcGroups = [
-    "Youth Environmental Advocates",
-    "Digital Literacy Champions",
-    "Community Health Volunteers",
-    "Arts & Culture Collective",
-    "Sports Development Team",
-    "Entrepreneurship Network",
-    "Education Empowerment Circle",
-    "Leadership Academy",
-    "Civic Engagement Coalition",
-    "Mental Health Awareness Group",
-    "Technology Innovation Hub",
-    "Social Justice Alliance",
-    "Sustainable Development Council",
+"Aletheians Debate Society",
+"Anak ng Teatro",                   
+"City College of Calapan- Student Parliament",          
+"ALA-GAD Advocates",
+"Oriental Mindoro Youth Leaders CCC",
+"Division Federated Supreme Secondary Learner Government - Calapan City",
+"ORIENTAL MINDORO NATIONAL HIGH SCHOOL - SSLG",
+"Rotaract Club of Calapan",
+"Scinatics Organization - CCC",
   ]
 
   // Animation effect for the carousel
