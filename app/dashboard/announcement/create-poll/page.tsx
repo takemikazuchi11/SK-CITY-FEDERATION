@@ -15,6 +15,8 @@ import { useToast } from "@/components/ui/use-toast"
 import { useAuth } from "@/lib/auth-context"
 import { AdminOnly } from "@/components/role-based-ui"
 import { useLoading } from "@/lib/loading-context";
+import { Switch } from "@/components/ui/switch"
+import { Mail } from "lucide-react"
 
 export default function CreatePollAnnouncement() {
   const router = useRouter()
@@ -22,6 +24,7 @@ export default function CreatePollAnnouncement() {
   const { user, isAdmin, loading } = useAuth()
   const [form, setForm] = useState({ title: 'POLL ANNOUNCEMENT', content: "", pollQuestion: "", pollOptions: ["", ""] })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [audience, setAudience] = useState<'everyone' | 'sk_chairpersons'>('everyone');
   const { setLoading } = useLoading();
 
   // Remove the local loading fallback
@@ -68,7 +71,7 @@ export default function CreatePollAnnouncement() {
       // 1. Create announcement
       const { data: announcementData, error: announcementError } = await supabase
         .from("announcements")
-        .insert([{ title: form.title, content: form.content, author: `${user.first_name} ${user.last_name}`, author_role: user.user_role, category: "poll", user_id: user.id, likes: 0 }])
+        .insert([{ title: form.title, content: form.content, author: `${user.first_name} ${user.last_name}`, author_role: user.user_role, category: "poll", user_id: user.id, likes: 0, audience }])
         .select()
       if (announcementError) throw announcementError
       const announcement = announcementData[0]
@@ -114,6 +117,17 @@ export default function CreatePollAnnouncement() {
           </CardHeader>
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
+              <div className="flex items-center gap-3 mb-2">
+                <Switch
+                  id="audience-switch"
+                  checked={audience === 'everyone'}
+                  onCheckedChange={checked => setAudience(checked ? 'everyone' : 'sk_chairpersons')}
+                />
+                <Mail className="h-5 w-5 text-muted-foreground" />
+                <Label htmlFor="audience-switch" className="cursor-pointer select-none">
+                  {audience === 'everyone' ? 'Send Poll to Everyone' : 'Send Poll to SK Chairpersons'}
+                </Label>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="title">Title *</Label>
                 <Input

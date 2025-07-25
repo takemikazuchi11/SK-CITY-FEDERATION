@@ -34,7 +34,7 @@ export default function AnnouncementList() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [localLoading, setLocalLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const { isAdmin } = useAuth() // Destructure both values from useAuth()
+  const { isAdmin, user } = useAuth() // Destructure both values from useAuth()
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [announcementToDelete, setAnnouncementToDelete] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -63,14 +63,22 @@ export default function AnnouncementList() {
     userVote: PollVote | null;
   }
   const [polls, setPolls] = useState<{ [announcementId: string]: PollData }>({});
-  const { user } = useAuth();
 
   useEffect(() => {
     async function fetchAnnouncements() {
       try {
         setLocalLoading(true)
         const data = await getAnnouncements()
-        setAnnouncements(data.slice(0, 3)) // Take the 3 most recent announcements
+        // Filter by audience
+        const filtered = data.filter(a => {
+          if (!a.audience || a.audience === 'everyone') return true;
+          if (a.audience === 'sk_chairpersons') {
+            // Only admins and moderators can see
+            return user && (user.user_role === 'admin' || user.user_role === 'moderator');
+          }
+          return false;
+        });
+        setAnnouncements(filtered.slice(0, 3)) // Take the 3 most recent visible announcements
         setError(null)
       } catch (err) {
         console.error("Error fetching announcements:", err)
@@ -81,7 +89,7 @@ export default function AnnouncementList() {
     }
 
     fetchAnnouncements()
-  }, [])
+  }, [user])
 
   useEffect(() => {
     async function fetchPolls() {
@@ -335,6 +343,13 @@ export default function AnnouncementList() {
         <div className="bg-red-600 text-white px-12 py-3 text-2xl font-bold text-center shadow-md mb-12 inline-block">
           Latest Announcements
         </div>
+      </div>
+
+      {/* See More Announcements Link */}
+      <div className="text-right mb-8">
+        <Link href="/dashboard/announcement" className="text-blue-600 font-medium hover:text-blue-800 inline-flex items-center">
+          See More Announcements <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

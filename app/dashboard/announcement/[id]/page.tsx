@@ -20,6 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/components/ui/use-toast"
 import { useAuth } from "@/lib/auth-context"
 import { supabase } from "@/lib/supabase";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 // Use generated Supabase types for poll data
 type PollOption = Database["public"]["Tables"]["poll_options"]["Row"];
@@ -72,6 +73,9 @@ export default function AnnouncementDetail() {
   const [hasLiked, setHasLiked] = useState(false)
   const [showCommentForm, setShowCommentForm] = useState(false)
   const [pollData, setPollData] = useState<null | { poll: PollAnnouncement; options: PollOption[]; votes: PollVote[]; userVote: PollVote | null }>(null);
+  const [likeCount, setLikeCount] = useState(0);
+  const [likeUsers, setLikeUsers] = useState<{ id: string, first_name: string, last_name: string }[]>([]);
+  const [pollVoters, setPollVoters] = useState<Record<string, { id: string, first_name: string, last_name: string }[]>>({});
 
   useEffect(() => {
     async function fetchAnnouncement() {
@@ -83,7 +87,8 @@ export default function AnnouncementDetail() {
           ...data,
           created_at: data.created_at ?? "",
           likes: data.likes ?? 0,
-          user_id: data.user_id ?? ""
+          user_id: data.user_id ?? "",
+          author_photo_url: data.author_photo_url ?? undefined
         };
         setAnnouncement(safeAnnouncement)
         setError(null)
@@ -106,6 +111,38 @@ export default function AnnouncementDetail() {
     }
     checkLiked()
   }, [user, announcement])
+
+  useEffect(() => {
+    async function fetchLikeCount() {
+      const { count, error } = await supabase
+        .from("announcement_likes")
+        .select("*", { count: "exact", head: true })
+        .eq("announcement_id", id);
+      if (!error) setLikeCount(count || 0);
+    }
+    if (id) fetchLikeCount();
+  }, [id, hasLiked]);
+
+  useEffect(() => {
+    async function fetchLikeUsers() {
+      const { data, error } = await supabase
+        .from("announcement_likes")
+        .select("user_id, users(first_name, last_name)")
+        .eq("announcement_id", id);
+      if (!error && data) {
+        setLikeUsers(
+          data
+            .filter((row: any) => row.users)
+            .map((row: any) => ({
+              id: row.user_id,
+              first_name: row.users.first_name,
+              last_name: row.users.last_name,
+            }))
+        );
+      }
+    }
+    if (id) fetchLikeUsers();
+  }, [id, hasLiked, likeCount]);
 
   useEffect(() => {
     async function fetchPoll() {
@@ -147,6 +184,32 @@ export default function AnnouncementDetail() {
     }
     fetchPoll();
   }, [id, user]);
+
+  useEffect(() => {
+    async function fetchPollVoters() {
+      if (!pollData) return;
+      const votersByOption: Record<string, { id: string, first_name: string, last_name: string }[]> = {};
+      for (const opt of pollData.options) {
+        const { data, error } = await supabase
+          .from("poll_votes")
+          .select("user_id, users(first_name, last_name)")
+          .eq("poll_option_id", opt.id);
+        if (!error && data) {
+          votersByOption[opt.id] = data
+            .filter((row: any) => row.users)
+            .map((row: any) => ({
+              id: row.user_id,
+              first_name: row.users.first_name,
+              last_name: row.users.last_name,
+            }));
+        } else {
+          votersByOption[opt.id] = [];
+        }
+      }
+      setPollVoters(votersByOption);
+    }
+    fetchPollVoters();
+  }, [pollData]);
 
   async function handleVote(pollOptionId: string) {
     if (!user) return;
@@ -321,27 +384,45 @@ export default function AnnouncementDetail() {
                   const percent = totalVotes > 0 ? Math.round((voteCount / totalVotes) * 100) : 0;
                   const userVotedFor = pollData.userVote && pollData.userVote.poll_option_id === opt.id;
                   return (
-                    <div key={opt.id} className={`relative flex items-center p-2 rounded-lg border ${userVotedFor ? 'border-blue-600 bg-blue-50' : 'border-gray-200 bg-gray-100'}`}
-                      style={{ boxShadow: userVotedFor ? '0 0 0 2px #2563eb' : undefined }}>
-                      <div className="flex-1">
-                        <div className="font-medium text-gray-900 mb-1">{opt.option_text}</div>
-                        <div className="w-full bg-gray-200 rounded h-3 relative">
-                          <div className={`h-3 rounded ${userVotedFor ? 'bg-blue-500' : 'bg-blue-300'}`} style={{ width: `${percent}%` }}></div>
-                        </div>
-                      </div>
-                      <div className="ml-4 text-right min-w-[60px]">
-                        <div className="font-semibold text-gray-700">{percent}%</div>
-                        <div className="text-xs text-gray-500">{voteCount} vote{voteCount !== 1 ? 's' : ''}</div>
-                      </div>
-                      <button
-                        onClick={() => handleVote(opt.id)}
-                        className="absolute inset-0 opacity-0 cursor-pointer"
-                        aria-label={`Vote for ${opt.option_text}`}
-                      />
-                      {userVotedFor && (
-                        null
-                      )}
-                    </div>
+                    <TooltipProvider key={opt.id} delayDuration={1000}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div
+                            className={`relative flex items-center p-2 rounded-lg border transition-colors cursor-pointer select-none ${userVotedFor ? 'border-blue-600 bg-blue-50' : 'border-gray-200 bg-gray-100 hover:border-blue-400 hover:bg-blue-100'}`}
+                            style={{ boxShadow: userVotedFor ? '0 0 0 2px #2563eb' : undefined }}
+                            onClick={() => handleVote(opt.id)}
+                            aria-pressed={!!userVotedFor}
+                            tabIndex={0}
+                            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleVote(opt.id); }}
+                          >
+                            <div className="flex-1">
+                              <div className={`font-medium mb-1 ${userVotedFor ? 'text-blue-700' : 'text-gray-900'}`}>{opt.option_text}</div>
+                              <div className="w-full bg-gray-200 rounded h-3 relative">
+                                <div className={`h-3 rounded ${userVotedFor ? 'bg-blue-500' : 'bg-blue-300'}`} style={{ width: `${percent}%` }}></div>
+                              </div>
+                            </div>
+                            <div className="ml-4 text-right min-w-[60px]">
+                              <div className={`font-semibold ${userVotedFor ? 'text-blue-700' : 'text-gray-700'}`}>{percent}%</div>
+                              <div className="text-xs text-gray-500">{voteCount} vote{voteCount !== 1 ? 's' : ''}</div>
+                            </div>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" align="center">
+                          {pollVoters[opt.id] && pollVoters[opt.id].length > 0 ? (
+                            <div className="text-sm">
+                              <div className="font-semibold mb-1">Voted by:</div>
+                              <ul>
+                                {pollVoters[opt.id].map((u) => (
+                                  <li key={u.id}>{u.first_name} {u.last_name}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          ) : (
+                            <span>No votes yet</span>
+                          )}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   );
                 })}
               </div>
@@ -349,35 +430,40 @@ export default function AnnouncementDetail() {
                 {pollData.votes.length.toLocaleString()} vote{pollData.votes.length !== 1 ? 's' : ''}
               </div>
             </div>
-          ) : (
-            <div className="mt-8 p-6 rounded-lg bg-white border shadow-sm text-gray-500 italic text-center">
-              No poll found for this announcement. If you expected a poll, please check the poll creation and database.
-            </div>
-          )}
+          ) : null}
         </CardContent>
         <CardFooter className="flex justify-between">
           {user ? (
-            <>
-              <Button
-                variant="ghost"
-                size="sm"
-                className={hasLiked ? "text-blue-600" : "text-muted-foreground"}
-                onClick={handleLike}
-                aria-pressed={hasLiked}
-              >
-                <ThumbsUp className="mr-1 h-4 w-4" />
-                {announcement.likes} {hasLiked ? "Liked" : "Like"}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground"
-                onClick={() => document.getElementById("comment-form")?.scrollIntoView({ behavior: "smooth" })}
-              >
-                <MessageSquare className="mr-1 h-4 w-4" />
-                Add Comment
-              </Button>
-            </>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={hasLiked ? "text-blue-600" : "text-muted-foreground"}
+                    onClick={handleLike}
+                    aria-pressed={hasLiked}
+                  >
+                    <ThumbsUp className="mr-1 h-4 w-4" />
+                    {likeCount} {hasLiked ? "Liked" : "Like"}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top" align="center">
+                  {likeUsers.length === 0 ? (
+                    <span>No likes yet</span>
+                  ) : (
+                    <div className="text-sm">
+                      <div className="font-semibold mb-1">Liked by:</div>
+                      <ul>
+                        {likeUsers.map((u) => (
+                          <li key={u.id}>{u.first_name} {u.last_name}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           ) : (
             <span className="text-muted-foreground text-sm">Log in to like or comment</span>
           )}
