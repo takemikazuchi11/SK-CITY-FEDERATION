@@ -18,6 +18,7 @@ type Announcement = {
   created_at: string
   created_by: string
   image_url?: string
+  audience?: string
 }
 
 export default function AnnouncementsPage() {
@@ -38,8 +39,17 @@ export default function AnnouncementsPage() {
 
         if (error) throw error
 
-        setAnnouncements(data || [])
-        setFilteredAnnouncements(data || [])
+        // Filter by audience for regular users
+        let filtered = (data || []).map(a => ({
+          ...a,
+          created_by: a.created_by ?? '',
+          audience: a.audience ?? 'everyone',
+        }));
+        if (user && user.user_role !== 'admin' && user.user_role !== 'moderator') {
+          filtered = filtered.filter(a => !a.audience || a.audience === 'everyone');
+        }
+        setAnnouncements(filtered)
+        setFilteredAnnouncements(filtered)
       } catch (error) {
         console.error("Error fetching announcements:", error)
       } finally {
@@ -48,7 +58,7 @@ export default function AnnouncementsPage() {
     }
 
     fetchAnnouncements()
-  }, [])
+  }, [user])
 
   useEffect(() => {
     if (searchQuery.trim() === "") {
@@ -76,7 +86,9 @@ export default function AnnouncementsPage() {
     <div className="container mx-auto py-10 px-4">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Announcements</h1>
+          <div className="bg-red-600 text-white px-12 py-3 text-3xl font-bold text-center shadow-md mb-3" style={{display: 'inline-block'}}>
+            Announcements
+          </div>
           <p className="text-gray-500 mt-1">Stay updated with the latest news and announcements</p>
         </div>
 
@@ -140,7 +152,7 @@ export default function AnnouncementsPage() {
                       <p className="line-clamp-3 text-gray-600">{announcement.content}</p>
                     </CardContent>
                     <CardFooter>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full bg-blue-600 text-white hover:bg-blue-700">
                         Read More
                       </Button>
                     </CardFooter>
@@ -182,7 +194,7 @@ export default function AnnouncementsPage() {
                       <p className="line-clamp-3 text-gray-600">{announcement.content}</p>
                     </CardContent>
                     <CardFooter>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full bg-blue-600 text-white hover:bg-blue-700">
                         Read More
                       </Button>
                     </CardFooter>
