@@ -23,7 +23,8 @@ import {
 } from "lucide-react"
 import SK from "@/public/SK-Logo.jpg"
 import CALAP from "@/public/calap.png"
-import disclosureImage from "@/public/SK-Logo.jpg" // Replace with actual disclosure board image when available
+import SPC from "@/public/SPC.jpg"
+import disclosureImage from "@/public/quarterly-FDB.png" // Replace with actual disclosure board image when available
 
 export default function DisclosurePage() {
   const [activeTab, setActiveTab] = useState("q1")
@@ -62,6 +63,9 @@ export default function DisclosurePage() {
         <div className="absolute top-0 right-0 flex space-x-2">
           <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
             <Image src={SK || "/placeholder.svg"} alt="SK Logo" width={100} height={100} />
+          </div>
+          <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+            <Image src={SPC || "/placeholder.svg"} alt="SK Logo" width={100} height={100} />
           </div>
           <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
             <Image src={CALAP || "/placeholder.svg"} alt="CALAP Logo" width={100} height={100} />
@@ -181,7 +185,7 @@ export default function DisclosurePage() {
                         className="object-cover"
                       />
                       <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white p-2 text-sm">
-                        Sample Full Disclosure Board
+                        Full Disclosure Policy (FDP)
                       </div>
                     </div>
                   </div>

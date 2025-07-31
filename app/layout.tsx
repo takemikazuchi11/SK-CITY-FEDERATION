@@ -12,9 +12,13 @@ import GlobalLoadingHandler from "@/components/GlobalLoadingHandler"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "SK Management System",
-  description: "A management system for Sangguniang Kabataan",
-    generator: 'v0.dev'
+  title: "SK Calapan City Federation",
+  description: "A management system for Sangguniang Kabataan Calapan City Federation",
+  generator: 'v0.dev',
+  icons: {
+    icon: '/SK-Logo-removebg-preview.png',
+    apple: '/SK-Logo-removebg-preview.png',
+  }
 }
 
 export default function RootLayout({

@@ -14,19 +14,15 @@ export default function KatipunanNgKabataanPage() {
 
   // Sample KK group names for the carousel
   const kkGroups = [
-    "Kabataang Maka-Kalikasan",
-    "Samahan ng Mag-aaral",
-    "Kabataang Lider ng Barangay",
-    "Sining at Kultura Kabataan",
-    "Kabataang Atleta",
-    "Kabataang Negosyante",
-    "Kabataang Tagapagtaguyod ng Edukasyon",
-    "Kabataang Boluntaryo sa Kalusugan",
-    "Kabataang Maka-Agham at Teknolohiya",
-    "Kabataang Tagapagtanggol ng Karapatan",
-    "Kabataang Maka-Diyos",
-    "Kabataang Manunulat",
-    "Kabataang Tagapagsulong ng Kapayapaan",
+    "Aletheians Debate Society",
+"Anak ng Teatro",                   
+"City College of Calapan- Student Parliament",          
+"ALA-GAD Advocates",
+"Oriental Mindoro Youth Leaders CCC",
+"Division Federated Supreme Secondary Learner Government - Calapan City",
+"ORIENTAL MINDORO NATIONAL HIGH SCHOOL - SSLG",
+"Rotaract Club of Calapan", 
+"Scinatics Organization - CCC",
   ]
 
   // Animation effect for the carousel

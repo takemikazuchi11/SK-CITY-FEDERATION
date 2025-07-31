@@ -22,7 +22,8 @@ import {
 import SK from "@/public/SK-Logo.jpg"
 import fidelity from "@/public/fidelity.png"
 import CALAP from "@/public/calap.png"
-import fpreview from "@/public/fpreview.png" // Replace with actual fidelity bond image when available
+import SPC from "@/public/SPC.jpg"
+import fpreview from "@/public/fidelity-bonding.png" // Replace with actual fidelity bond image when available
 
 export default function FidelityBondingPage() {
   const [activeTab, setActiveTab] = useState("requirements")
@@ -59,6 +60,9 @@ export default function FidelityBondingPage() {
         <div className="absolute top-0 right-0 flex space-x-2">
           <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
             <Image src={SK || "/placeholder.svg"} alt="SK Logo" width={100} height={100} />
+          </div>
+          <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+            <Image src={SPC || "/placeholder.svg"} alt="SK Logo" width={100} height={100} />
           </div>
           <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
             <Image src={CALAP || "/placeholder.svg"} alt="CALAP Logo" width={100} height={100} />
@@ -171,7 +175,7 @@ export default function FidelityBondingPage() {
                         className="object-cover"
                       />
                       <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white p-2 text-sm">
-                         Fidelity Bond Certificate
+                         Fidelity Bonding
                       </div>
                     </div>
                   </div>

@@ -20,6 +20,7 @@ import {
 } from "lucide-react"
 import epreview from "@/public/epreview.png"
 import SK from "@/public/SK-Logo.jpg"
+import SPC from "@/public/SPC.jpg"
 import CALAP from "@/public/calap.png"
 
 export default function EFPSPage() {
@@ -57,6 +58,9 @@ export default function EFPSPage() {
         <div className="absolute top-0 right-0 flex space-x-2">
           <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
             <Image src={SK || "/placeholder.svg"} alt="Logo 1" width={100} height={100} />
+          </div>
+          <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+            <Image src={SPC || "/placeholder.svg"} alt="Logo 1" width={100} height={100} />
           </div>
           <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
             <Image src={CALAP || "/placeholder.svg"} alt="Logo 1" width={100} height={100} />

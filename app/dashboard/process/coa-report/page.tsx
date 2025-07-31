@@ -23,7 +23,8 @@ import {
 } from "lucide-react"
 import SK from "@/public/SK-Logo.jpg"
 import CALAP from "@/public/calap.png"
-
+import SPC from "@/public/SPC.jpg"
+import coa from  "@/public/coa-report.png" // Replace with actual COA image when available
 export default function COAReportPage() {
   const [activeTab, setActiveTab] = useState("preparation")
   const [isVideoPlaying, setIsVideoPlaying] = useState(false)
@@ -59,6 +60,9 @@ export default function COAReportPage() {
         <div className="absolute top-0 right-0 flex space-x-2">
           <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
             <Image src={SK || "/placeholder.svg"} alt="SK Logo" width={100} height={100} />
+          </div>
+          <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+            <Image src={SPC || "/placeholder.svg"} alt="SK Logo" width={100} height={100} />
           </div>
           <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
             <Image src={CALAP || "/placeholder.svg"} alt="COA Logo" width={100} height={100} />
@@ -165,13 +169,13 @@ export default function COAReportPage() {
                   <div className="md:w-1/2 bg-gray-100 rounded-lg overflow-hidden">
                     <div className="relative h-64 w-full">
                       <Image
-                        src="/placeholder.svg?height=400&width=600"
+                        src={coa ||"/placeholder.svg?height=400&width=600"}
                         alt="COA Report Sample"
                         fill
                         className="object-cover"
                       />
                       <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white p-2 text-sm">
-                        Sample COA Report Format
+                        COA Report
                       </div>
                     </div>
                   </div>

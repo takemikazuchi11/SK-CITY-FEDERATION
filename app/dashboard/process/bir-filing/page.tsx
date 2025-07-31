@@ -17,9 +17,11 @@ import {
   AlertTriangle,
   FileQuestion,
 } from "lucide-react"
+import birpreview from "@/public/bir-preview.png" // Replace with actual BIR preview image when available
 import SK from "@/public/SK-Logo.jpg"
 import CALAP from "@/public/calap.png"
 import SPC from "@/public/SPC.jpg"
+import bir from "@/public/bir-filing.png" // Replace with actual BIR image when available
 
 export default function BIRFilingPage() {
   const [activeTab, setActiveTab] = useState("registration")
@@ -156,7 +158,7 @@ export default function BIRFilingPage() {
                   <div className="md:w-1/2 bg-gray-100 rounded-lg overflow-hidden">
                     <div className="relative h-64 w-full">
                       <Image
-                        src="/placeholder.svg?height=400&width=600"
+                        src={ bir || "/placeholder.svg?height=400&width=600"}
                         alt="BIR Filing Concept"
                         fill
                         className="object-cover"
@@ -546,7 +548,7 @@ export default function BIRFilingPage() {
                   {!isVideoPlaying ? (
                     <div className="absolute inset-0 flex items-center justify-center">
                       <Image
-                        src="/placeholder.svg?height=720&width=1280"
+                        src={birpreview}
                         alt="BIR Filing Tutorial Video Thumbnail"
                         fill
                         className="object-cover opacity-70"
@@ -561,7 +563,7 @@ export default function BIRFilingPage() {
                     </div>
                   ) : (
                     <iframe
-                      src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                      src="https://www.youtube.com/embed/ZB7_CaOX22s?si=PauEvBXpJVfljtzw" 
                       title="BIR Filing Tutorial Video"
                       className="absolute inset-0 w-full h-full"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

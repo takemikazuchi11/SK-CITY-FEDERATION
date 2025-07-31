@@ -18,7 +18,7 @@ export default function KatipunanKabataanPage() {
 "Oriental Mindoro Youth Leaders CCC",
 "Division Federated Supreme Secondary Learner Government - Calapan City",
 "ORIENTAL MINDORO NATIONAL HIGH SCHOOL - SSLG",
-"Rotaract Club of Calapan",
+"Rotaract Club of Calapan", 
 "Scinatics Organization - CCC",
   ]
 

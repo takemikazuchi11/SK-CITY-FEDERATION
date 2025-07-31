@@ -8,8 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { FileText, BookOpen, CheckCircle, HelpCircle, Users, ClipboardList, ExternalLink, Download, Play, AlertTriangle, FileQuestion, BarChart, Calculator, Landmark, FileCheck, Clock } from 'lucide-react'
 import SK from "@/public/SK-Logo.jpg"
+import SPC from "@/public/SPC.jpg"
 import CALAP from "@/public/calap.png"
-
+import coa from "@/public/coa-handbook.png"
 export default function COAHandbookPage() {
   const [activeTab, setActiveTab] = useState("purpose")
   const [isVideoPlaying, setIsVideoPlaying] = useState(false)
@@ -46,6 +47,9 @@ export default function COAHandbookPage() {
         <div className="absolute top-0 right-0 flex space-x-2">
           <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
             <Image src={SK || "/placeholder.svg"} alt="SK Logo" width={100} height={100} />
+          </div>
+          <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+            <Image src={SPC || "/placeholder.svg"} alt="SK Logo" width={100} height={100} />
           </div>
           <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
             <Image src={CALAP || "/placeholder.svg"} alt="COA Logo" width={100} height={100} />
@@ -159,8 +163,9 @@ export default function COAHandbookPage() {
                   </div>
                   <div className="md:w-1/2 bg-gray-100 rounded-lg overflow-hidden">
                     <div className="relative h-64 w-full">
+
                       <Image
-                        src="/placeholder.svg?height=400&width=600"
+                        src={ coa || "/placeholder.svg?height=400&width=600"}
                         alt="COA Handbook Cover"
                         fill
                         className="object-cover"

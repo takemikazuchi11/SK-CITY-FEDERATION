@@ -164,10 +164,11 @@ export async function getCommentsByAnnouncementId(announcementId: string) {
 
   if (error) throw error
 
-  // Ensure each comment has a user_photo_url property
+  // Ensure each comment has proper default values
   return data.map((comment) => ({
     ...comment,
     user_photo_url: comment.user_photo_url || null,
+    likes: comment.likes || 0, // Ensure likes is never null
   }))
 }
 
@@ -179,6 +180,36 @@ export async function createComment(comment: Omit<Comment, "id" | "created_at" |
 
   if (error) throw error
   return data[0]
+}
+
+export async function updateComment(commentId: string, content: string) {
+  const { data, error } = await supabase
+    .from("comments")
+    .update({ content })
+    .eq("id", commentId)
+    .select()
+
+  if (error) throw error
+  return data[0]
+}
+
+export async function deleteComment(commentId: string) {
+  // First delete all likes for this comment
+  const { error: likesError } = await supabase
+    .from("comment_likes")
+    .delete()
+    .eq("comment_id", commentId)
+  
+  if (likesError) throw likesError
+
+  // Then delete the comment
+  const { error } = await supabase
+    .from("comments")
+    .delete()
+    .eq("id", commentId)
+
+  if (error) throw error
+  return true
 }
 
 export async function likeComment(id: string) {
@@ -912,6 +943,23 @@ export async function toggleCommentLike(commentId: string, userId: string) {
       .eq("comment_id", commentId)
       .eq("user_id", userId);
     if (error) throw error;
+    
+    // Get current likes count and decrement it
+    const { data: comment, error: fetchError } = await supabase
+      .from("comments")
+      .select("likes")
+      .eq("id", commentId)
+      .single();
+    
+    if (fetchError) throw fetchError;
+    
+    const newLikes = Math.max((comment?.likes || 0) - 1, 0);
+    const { error: updateError } = await supabase
+      .from("comments")
+      .update({ likes: newLikes })
+      .eq("id", commentId);
+    if (updateError) throw updateError;
+    
     return false;
   } else {
     // Like
@@ -919,6 +967,23 @@ export async function toggleCommentLike(commentId: string, userId: string) {
       .from("comment_likes")
       .insert([{ comment_id: commentId, user_id: userId }]);
     if (error) throw error;
+    
+    // Get current likes count and increment it
+    const { data: comment, error: fetchError } = await supabase
+      .from("comments")
+      .select("likes")
+      .eq("id", commentId)
+      .single();
+    
+    if (fetchError) throw fetchError;
+    
+    const newLikes = (comment?.likes || 0) + 1;
+    const { error: updateError } = await supabase
+      .from("comments")
+      .update({ likes: newLikes })
+      .eq("id", commentId);
+    if (updateError) throw updateError;
+    
     return true;
   }
 }
