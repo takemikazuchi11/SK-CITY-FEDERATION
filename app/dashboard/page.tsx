@@ -20,9 +20,8 @@ import NewsSection from "@/components/news-section"
 
 // Import carousel images
 import banner1 from "@/public/1.jpg"
-import banner2 from "@/public/2banner.png"
+import banner2 from "@/public/2banner.jpg"
 import banner3 from "@/public/3.jpg"
-
 import cydc from "@/public/cydc.jpg"
 
 // Carousel images
