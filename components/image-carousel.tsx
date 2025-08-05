@@ -41,8 +41,8 @@ export function ImageCarousel({ images, autoplayInterval = 5000, className }: Ca
 
   return (
     <div className={cn("relative w-full overflow-hidden", className)}>
-      {/* Carousel container - Optimized height to match image aspect ratio */}
-      <div className="relative w-full h-[250px] sm:h-[300px] md:h-[350px] lg:h-[400px] xl:h-[450px] 2xl:h-[500px] overflow-hidden">
+      {/* Carousel container - 21:9 aspect ratio to match banner images */}
+      <div className="relative w-full aspect-[21/9] overflow-hidden">
         {images.map((image, index) => (
           <div
             key={index}
