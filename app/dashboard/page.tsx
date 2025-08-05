@@ -19,10 +19,9 @@ import LegislativeArchives from "@/components/legislative-archives"
 import NewsSection from "@/components/news-section"
 
 // Import carousel images
-import banner1 from "@/public/banner1.jpg"
-import banner2 from "@/public/SK-Logo.jpg"
-import banner3 from "@/public/banner3.jpg"
-import banner4 from "@/public/banner-sk.jpeg"
+import banner1 from "@/public/1.jpg"
+import banner2 from "@/public/2.jpg"
+import banner3 from "@/public/3.jpg"
 
 import cydc from "@/public/cydc.jpg"
 
@@ -39,10 +38,6 @@ const carouselImages = [
   {
     src: banner3,
     alt: "Educational workshops",
-  },
-  {
-    src: banner4,
-    alt: "Leadership development",
   },
 ]
 

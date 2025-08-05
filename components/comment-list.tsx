@@ -68,11 +68,11 @@ export default function CommentList({ announcementId, refreshTrigger = 0 }: Comm
     async function fetchUserLikes() {
       if (user && comments.length > 0) {
         try {
-          const likes: { [commentId: string]: boolean } = {}
-          for (const comment of comments) {
-            likes[comment.id] = await hasUserLikedComment(comment.id, user.id)
-          }
-          setUserLiked(likes)
+        const likes: { [commentId: string]: boolean } = {}
+        for (const comment of comments) {
+          likes[comment.id] = await hasUserLikedComment(comment.id, user.id)
+        }
+        setUserLiked(likes)
         } catch (error) {
           console.error("Error fetching user likes:", error)
         }
@@ -101,8 +101,8 @@ export default function CommentList({ announcementId, refreshTrigger = 0 }: Comm
           likes: updatedComment.likes || 0, // Ensure likes is never null
         };
         
-        setComments((prev) =>
-          prev.map((comment) =>
+      setComments((prev) =>
+        prev.map((comment) =>
             comment.id === id ? processedComment : comment
           )
         )
@@ -259,14 +259,14 @@ export default function CommentList({ announcementId, refreshTrigger = 0 }: Comm
                 <AvatarImage src={getUserPhotoUrl(comment)} alt={comment.author} />
                 <AvatarFallback className="text-xs">{comment.author.charAt(0)}</AvatarFallback>
               </Avatar>
-                              <div className="flex-1">
-                  <div className="flex justify-between items-start">
-                    <div>
+              <div className="flex-1">
+                <div className="flex justify-between items-start">
+                  <div>
                       <h4 className="font-medium text-sm">{comment.author}</h4>
                       <p className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(comment.created_at))}
-                      </p>
-                    </div>
+                      {formatDistanceToNow(new Date(comment.created_at))}
+                    </p>
+                  </div>
                   <div className="flex items-center gap-1">
                     {user && comment.user_id === user.id && (
                       <>
@@ -321,8 +321,8 @@ export default function CommentList({ announcementId, refreshTrigger = 0 }: Comm
                     )}
                     <Button variant="ghost" size="icon" className="h-6 w-6">
                       <Flag className="h-3 w-3" />
-                      <span className="sr-only">Report</span>
-                    </Button>
+                    <span className="sr-only">Report</span>
+                  </Button>
                   </div>
                 </div>
                 {editingComment === comment.id ? (
