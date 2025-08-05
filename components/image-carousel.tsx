@@ -41,8 +41,8 @@ export function ImageCarousel({ images, autoplayInterval = 5000, className }: Ca
 
   return (
     <div className={cn("relative w-full overflow-hidden", className)}>
-      {/* Carousel container - Full width and responsive height */}
-      <div className="relative w-full h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] xl:h-[800px] 2xl:h-[900px] overflow-hidden bg-gray-100">
+      {/* Carousel container - Reduced height to minimize empty space */}
+      <div className="relative w-full h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px] xl:h-[500px] 2xl:h-[550px] overflow-hidden bg-gray-100">
         {images.map((image, index) => (
           <div
             key={index}
