@@ -20,7 +20,7 @@ import NewsSection from "@/components/news-section"
 
 // Import carousel images
 import banner1 from "@/public/1.jpg"
-import banner2 from "@/public/2.jpg"
+import banner2 from "@/public/2.png"
 import banner3 from "@/public/3.jpg"
 
 import cydc from "@/public/cydc.jpg"
@@ -201,9 +201,9 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Main Content */}
-      {/* Hero Section with Carousel - Full width */}
+      {/* Hero Section with Carousel */}
       <section className="w-full">
-        <ImageCarousel images={carouselImages} className="w-full" />
+        <ImageCarousel images={carouselImages} />
       </section>
 
       {/* Welcome Section - Now below the carousel */}
