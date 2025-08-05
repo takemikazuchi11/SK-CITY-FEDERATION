@@ -78,7 +78,7 @@ export function EditOrdinanceModal({ document, isResolution, onUpdate }: EditOrd
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="title">Title</Label>
+              <Label htmlFor="title">Title *</Label>
               <Input
                 id="title"
                 value={formData.title}
@@ -97,7 +97,7 @@ export function EditOrdinanceModal({ document, isResolution, onUpdate }: EditOrd
           </div>
 
           <div>
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">Description *</Label>
             <Textarea
               id="description"
               value={formData.description}
@@ -109,7 +109,7 @@ export function EditOrdinanceModal({ document, isResolution, onUpdate }: EditOrd
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="date">Date</Label>
+              <Label htmlFor="date">Date *</Label>
               <Input
                 id="date"
                 type="date"
@@ -119,7 +119,7 @@ export function EditOrdinanceModal({ document, isResolution, onUpdate }: EditOrd
               />
             </div>
             <div>
-              <Label htmlFor="date_enact">Date Enacted</Label>
+              <Label htmlFor="date_enact">Date Enacted *</Label>
               <Input
                 id="date_enact"
                 type="date"
@@ -151,7 +151,7 @@ export function EditOrdinanceModal({ document, isResolution, onUpdate }: EditOrd
               />
             </div>
             <div>
-              <Label htmlFor="pdf">PDF URL</Label>
+              <Label htmlFor="pdf">PDF URL *</Label>
               <Input
                 id="pdf"
                 value={formData.pdf}

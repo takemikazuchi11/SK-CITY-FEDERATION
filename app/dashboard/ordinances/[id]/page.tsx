@@ -89,7 +89,7 @@ export default function OrdinancePage() {
         <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white">
           <h2 className="text-lg md:text-xl font-medium text-sky-300 mb-2">LEGISLATIVE ISSUANCES</h2>
           <h1 className="text-2xl md:text-4xl font-bold text-center px-4">
-            {documentType.toUpperCase()} NO. {document.id}
+            {documentType.toUpperCase()} NO. {document.isResolution ? document.resolution_no : document.ordinance_no}
           </h1>
         </div>
       </div>
@@ -111,7 +111,7 @@ export default function OrdinancePage() {
             {/* Left Column - Document Details */}
             <div className="p-6 md:p-8">
               <h2 className="text-xl md:text-2xl font-bold text-sky-600 mb-2">
-                {documentType.toUpperCase()} NO. {document.id}
+                {documentType.toUpperCase()} NO. {document.isResolution ? document.resolution_no : document.ordinance_no}
               </h2>
               <p className="text-gray-700 mb-6">{document.title}</p>
 
@@ -184,7 +184,7 @@ export default function OrdinancePage() {
               <iframe
                 src={`${document.pdfUrl}#toolbar=0&navpanes=0`}
                 className="w-full h-[600px] border border-gray-300"
-                title={`${documentType} ${document.id} PDF`}
+                title={`${documentType} ${document.isResolution ? document.resolution_no : document.ordinance_no} PDF`}
               >
                 <p>Your browser does not support iframes. Please download the PDF to view it.</p>
               </iframe>

@@ -91,12 +91,13 @@ export default function CreateResolutionPage() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="author">Author</Label>
+                    <Label htmlFor="author">Author *</Label>
                     <Input
                       id="author"
                       value={formData.author}
                       onChange={(e) => handleInputChange("author", e.target.value)}
                       placeholder="Author name"
+                      required
                     />
                   </div>
                 </div>
@@ -148,23 +149,25 @@ export default function CreateResolutionPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="sponsors">Sponsors (comma-separated)</Label>
+                  <Label htmlFor="sponsors">Sponsors (comma-separated) *</Label>
                   <Input
                     id="sponsors"
                     value={formData.sponsors}
                     onChange={(e) => handleInputChange("sponsors", e.target.value)}
                     placeholder="Sponsor 1, Sponsor 2, Sponsor 3"
+                    required
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="img">Author Image URL</Label>
+                    <Label htmlFor="img">Author Image URL *</Label>
                     <Input
                       id="img"
                       value={formData.img}
                       onChange={(e) => handleInputChange("img", e.target.value)}
                       placeholder="https://example.com/image.jpg"
+                      required
                     />
                   </div>
                   <div>
