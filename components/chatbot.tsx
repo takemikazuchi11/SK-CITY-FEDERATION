@@ -19,23 +19,40 @@ type Message = {
 
 export function Chatbot() {
   const [isOpen, setIsOpen] = useState(false)
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "welcome-message",
-      content:
-        "Hi there! How can I help you today? I can suggest events, analyze participation data, or recommend activities based on member interests.",
-      role: "assistant",
-    },
-  ])
+  const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { user } = useAuth()
-  const [suggestedQueries, setSuggestedQueries] = useState([
-    "What are the most popular events right now?",
-    "Can you suggest events?",
-    "Suggest new events for our members this summer",
-  ])
+  const [suggestedQueries, setSuggestedQueries] = useState<string[]>([])
+
+  // Initialize messages and suggested queries based on user status
+  useEffect(() => {
+    const welcomeMessage = user 
+      ? `Hi ${user.first_name}! How can I help you today? I can suggest events based on your interests, show you your participation history, or recommend activities in your barangay.`
+      : "Hi there! How can I help you today? I can suggest events, analyze participation data, or recommend activities based on member interests."
+
+    setMessages([{
+      id: "welcome-message",
+      content: welcomeMessage,
+      role: "assistant",
+    }])
+
+    // Set initial suggested queries based on user status
+    if (user) {
+      setSuggestedQueries([
+        "What events have I registered for?",
+        "Suggest events based on my interests",
+        "Show me events in my barangay",
+      ])
+    } else {
+      setSuggestedQueries([
+        "What are the most popular events right now?",
+        "Can you suggest events?",
+        "Suggest new events for our members this summer",
+      ])
+    }
+  }, [user])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -65,7 +82,13 @@ export function Chatbot() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: input }),
+        body: JSON.stringify({ 
+          message: input,
+          userId: user?.id || null,
+          userRole: user?.user_role || null,
+          userName: user ? `${user.first_name} ${user.last_name}` : null,
+          userBarangay: user?.barangay || null
+        }),
       })
 
       let data
@@ -90,14 +113,22 @@ export function Chatbot() {
 
       setMessages((prev) => [...prev, assistantMessage])
 
-      // Update suggested queries based on the conversation context
+      // Update suggested queries based on the conversation context and user data
       const lowerInput = input.toLowerCase()
       if (lowerInput.includes("event") || lowerInput.includes("activity")) {
-        setSuggestedQueries([
-          "What are the most popular events right now?",
-          "How many participants are in each event category?",
-          "Which event has the highest registration count?",
-        ])
+        if (user) {
+          setSuggestedQueries([
+            "What events have I registered for?",
+            "Suggest events similar to what I've attended",
+            "Show me my event participation history",
+          ])
+        } else {
+          setSuggestedQueries([
+            "What are the most popular events right now?",
+            "How many participants are in each event category?",
+            "Which event has the highest registration count?",
+          ])
+        }
       } else if (
         lowerInput.includes("popular") ||
         lowerInput.includes("participation") ||
@@ -109,11 +140,19 @@ export function Chatbot() {
           "Which event categories should we focus on?",
         ])
       } else if (lowerInput.includes("suggest") || lowerInput.includes("idea")) {
-        setSuggestedQueries([
-          "Suggest events similar to our Basketball Tournament",
-          "What environmental activities could we organize?",
-          "Give me ideas for youth leadership programs",
-        ])
+        if (user) {
+          setSuggestedQueries([
+            "Suggest events based on my interests",
+            "What events would you recommend for me?",
+            "Show me events in my barangay",
+          ])
+        } else {
+          setSuggestedQueries([
+            "Suggest events similar to our Basketball Tournament",
+            "What environmental activities could we organize?",
+            "Give me ideas for youth leadership programs",
+          ])
+        }
       }
     } catch (error) {
       console.error("Error generating response:", error)

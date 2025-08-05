@@ -1,10 +1,14 @@
 import { supabase } from "./supabase"
 
 export async function getUpcomingEvents(limit: number) {
+  const today = new Date().toISOString().split("T")[0] // Get current date in YYYY-MM-DD format
+  
+  console.log(`Fetching upcoming events from ${today} onwards`)
+
   const { data, error } = await supabase
     .from("events")
     .select("*")
-    .eq("status", "upcoming")
+    .gte("date", today) // Get events from today onwards
     .order("date", { ascending: true })
     .limit(limit)
 
@@ -13,7 +17,8 @@ export async function getUpcomingEvents(limit: number) {
     return []
   }
 
-  return data
+  console.log(`Found ${data?.length || 0} upcoming events`)
+  return data || []
 }
 
 // Update the getUpcomingEventsByProximity function to include all necessary event details
@@ -42,7 +47,7 @@ export async function getUpcomingEventsByProximity(limit = 2) {
 }
 
 export async function getEventById(id: number) {
-  const { data, error } = await supabase.from("events").select("*").eq("id", id).single()
+  const { data, error } = await supabase.from("events").select("*").eq("id", id.toString()).single()
 
   if (error) {
     console.error(`Error fetching event with id ${id}:`, error)
@@ -128,7 +133,7 @@ export async function getLatestAnnouncements(limit: number) {
 }
 
 export async function getAnnouncementById(id: number) {
-  const { data, error } = await supabase.from("announcements").select("*").eq("id", id).single()
+  const { data, error } = await supabase.from("announcements").select("*").eq("id", id.toString()).single()
 
   if (error) {
     console.error(`Error fetching announcement with id ${id}:`, error)
@@ -331,9 +336,9 @@ export async function updateBarangay(
 export async function createSKOfficial(official: {
   full_name: string
   position: string
-  position_order?: number
-  phone?: string
-  email?: string
+  position_order: number
+  phone: string
+  email: string
   photo_url?: string
   barangay_id: number
   description?: string
@@ -349,5 +354,34 @@ export async function createSKOfficial(official: {
   }
 
   return data[0]
+}
+
+export async function getEventsByTimePeriod(startDate: string, endDate?: string) {
+  let query = supabase
+    .from("events")
+    .select("*")
+    .gte("date", startDate)
+    .order("date", { ascending: true })
+
+  if (endDate) {
+    query = query.lte("date", endDate)
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    console.error("Error fetching events by time period:", error)
+    return []
+  }
+
+  console.log(`Found ${data?.length || 0} events between ${startDate} and ${endDate || 'now'}`)
+  return data || []
+}
+
+export async function getEventsByMonth(year: number, month: number) {
+  const startDate = `${year}-${month.toString().padStart(2, '0')}-01`
+  const endDate = `${year}-${month.toString().padStart(2, '0')}-31`
+  
+  return getEventsByTimePeriod(startDate, endDate)
 }
 

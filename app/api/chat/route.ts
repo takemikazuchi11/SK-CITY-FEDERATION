@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server"
-import { getUpcomingEvents, getLatestAnnouncements, searchEvents, searchAnnouncements } from "@/lib/data-service"
+import { getUpcomingEvents, getLatestAnnouncements, searchEvents, searchAnnouncements, getEventsByMonth } from "@/lib/data-service"
 import { getPopularEvents, getUserParticipationData } from "@/lib/participation-service"
+import { getUserAnalytics, getPersonalizedEventRecommendations } from "@/lib/user-analytics"
 import type { Database } from "@/types/supabase"
+import { supabase } from "@/lib/supabase"
 
 export async function POST(req: Request) {
   try {
-    const { message } = await req.json()
+    const { message, userId, userRole, userName, userBarangay } = await req.json()
     const apiKey = process.env.GROQ_API_KEY
 
     if (!apiKey) {
@@ -36,6 +38,20 @@ export async function POST(req: Request) {
           count: number
         }[]
       }
+      userData?: {
+        registeredEvents: any[]
+        participationHistory: any[]
+        userPreferences: string[]
+        barangayEvents: EventRow[]
+        analytics?: any // Added for user analytics
+        personalizedRecommendations?: any[] // Added for personalized recommendations
+      }
+      allEvents?: EventRow[] // Added for all events
+      monthSpecificEvents?: {
+        month: string;
+        year: number;
+        events: EventRow[];
+      }
     } = {
       upcomingEvents: [],
       latestAnnouncements: [],
@@ -52,12 +68,100 @@ export async function POST(req: Request) {
 
     try {
       console.log("Processing chat message:", message)
+      console.log("User context:", { userId, userRole, userName, userBarangay })
 
       // Get basic data
-      const [upcomingEvents, latestAnnouncements] = await Promise.all([getUpcomingEvents(5), getLatestAnnouncements(3)])
+      const [upcomingEvents, latestAnnouncements] = await Promise.all([getUpcomingEvents(10), getLatestAnnouncements(5)])
 
       contextData.upcomingEvents = upcomingEvents
       contextData.latestAnnouncements = latestAnnouncements
+
+      console.log(`Fetched ${upcomingEvents.length} upcoming events and ${latestAnnouncements.length} announcements`)
+
+      // Also fetch all events for comprehensive context
+      const { data: allEvents, error: allEventsError } = await supabase
+        .from("events")
+        .select("*")
+        .order("date", { ascending: false })
+        .limit(20)
+
+      if (!allEventsError && allEvents) {
+        console.log(`Total events in database: ${allEvents.length}`)
+        // Add all events to context for better AI understanding
+        contextData.allEvents = allEvents
+      }
+
+      // If user is logged in, fetch user-specific data
+      if (userId) {
+        try {
+          // Import the function to get user's registered events
+          const { getUserRegisteredEvents } = await import("@/app/action/event-actions")
+          
+          // Get user's registered events
+          const userEventsResult = await getUserRegisteredEvents(userId)
+          if (userEventsResult.success) {
+            contextData.userData = {
+              registeredEvents: userEventsResult.data,
+              participationHistory: userEventsResult.data,
+              userPreferences: [],
+              barangayEvents: []
+            }
+
+            // Analyze user preferences based on registered events
+            const userEventTitles = userEventsResult.data.map((reg: any) => reg.events?.title?.toLowerCase() || "")
+            const preferences = []
+            
+            if (userEventTitles.some(title => title.includes("basketball") || title.includes("sport"))) {
+              preferences.push("sports")
+            }
+            if (userEventTitles.some(title => title.includes("environment") || title.includes("tree") || title.includes("clean"))) {
+              preferences.push("environment")
+            }
+            if (userEventTitles.some(title => title.includes("workshop") || title.includes("training") || title.includes("education"))) {
+              preferences.push("education")
+            }
+            if (userEventTitles.some(title => title.includes("art") || title.includes("culture") || title.includes("music"))) {
+              preferences.push("arts & culture")
+            }
+            if (userEventTitles.some(title => title.includes("community") || title.includes("service") || title.includes("volunteer"))) {
+              preferences.push("community service")
+            }
+
+            contextData.userData.userPreferences = preferences
+
+            // Get events in user's barangay if available
+            if (userBarangay) {
+              const { data: barangayEvents } = await supabase
+                .from("events")
+                .select("*")
+                .ilike("location", `%${userBarangay}%`)
+                .gte("date", new Date().toISOString().split('T')[0])
+                .order("date", { ascending: true })
+                .limit(5)
+
+              if (barangayEvents) {
+                contextData.userData.barangayEvents = barangayEvents
+              }
+            }
+
+            // Get detailed user analytics for better recommendations
+            const userAnalytics = await getUserAnalytics(userId)
+            if (userAnalytics) {
+              // Add analytics data to userData
+              contextData.userData.analytics = userAnalytics
+              
+              // Get personalized event recommendations
+              const personalizedRecommendations = await getPersonalizedEventRecommendations(userId, 3)
+              if (personalizedRecommendations.length > 0) {
+                contextData.userData.personalizedRecommendations = personalizedRecommendations
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching user-specific data:", error)
+          // Continue without user data if there's an error
+        }
+      }
 
       // If the message contains keywords related to suggestions or recommendations
       const lowerMessage = message.toLowerCase()
@@ -114,6 +218,37 @@ export async function POST(req: Request) {
           const eventResults = await searchEvents(searchTerms)
           contextData.searchResults.events = eventResults
         }
+
+        // Check for month-specific queries
+        const monthKeywords = {
+          "january": 1, "jan": 1,
+          "february": 2, "feb": 2,
+          "march": 3, "mar": 3,
+          "april": 4, "apr": 4,
+          "may": 5,
+          "june": 6, "jun": 6,
+          "july": 7, "jul": 7,
+          "august": 8, "aug": 8,
+          "september": 9, "sep": 9, "sept": 9,
+          "october": 10, "oct": 10,
+          "november": 11, "nov": 11,
+          "december": 12, "dec": 12
+        }
+
+        for (const [monthName, monthNumber] of Object.entries(monthKeywords)) {
+          if (lowerMessage.includes(monthName)) {
+            const currentYear = new Date().getFullYear()
+            const monthEvents = await getEventsByMonth(currentYear, monthNumber)
+            if (monthEvents.length > 0) {
+              contextData.monthSpecificEvents = {
+                month: monthName,
+                year: currentYear,
+                events: monthEvents
+              }
+            }
+            break
+          }
+        }
       }
 
       if (
@@ -148,12 +283,118 @@ export async function POST(req: Request) {
     // Create a context string from the data
     let contextString = ""
 
+    // Add user-specific context if available
+    if (contextData.userData && userId) {
+      contextString += `Current User Information:\n`
+      contextString += `Name: ${userName}\n`
+      contextString += `Role: ${userRole}\n`
+      if (userBarangay) {
+        contextString += `Barangay: ${userBarangay}\n`
+      }
+      contextString += `\n`
+
+      if (contextData.userData.registeredEvents.length > 0) {
+        contextString += `User's Registered Events:\n`
+        contextData.userData.registeredEvents.forEach((reg: any, index: number) => {
+          const event = reg.events
+          if (event && event.date) {
+            contextString += `${index + 1}. "${event.title}" on ${new Date(event.date).toLocaleDateString()} at ${event.location}. Registration status: ${reg.status}\n`
+          }
+        })
+        contextString += `\n`
+      }
+
+      if (contextData.userData.userPreferences.length > 0) {
+        contextString += `User's Event Preferences (based on past participation):\n`
+        contextData.userData.userPreferences.forEach((pref: string, index: number) => {
+          contextString += `${index + 1}. ${pref}\n`
+        })
+        contextString += `\n`
+      }
+
+      // Add detailed analytics if available
+      if (contextData.userData.analytics) {
+        const analytics = contextData.userData.analytics
+        contextString += `User Analytics:\n`
+        contextString += `Total events registered: ${analytics.totalEventsRegistered}\n`
+        contextString += `Average participation rate: ${analytics.averageParticipationRate.toFixed(1)}%\n`
+        if (analytics.favoriteEventCategories.length > 0) {
+          contextString += `Favorite event categories: ${analytics.favoriteEventCategories.join(", ")}\n`
+        }
+        if (analytics.lastEventDate) {
+          contextString += `Last event registration: ${new Date(analytics.lastEventDate).toLocaleDateString()}\n`
+        }
+        if (analytics.upcomingRegisteredEvents.length > 0) {
+          contextString += `Upcoming registered events: ${analytics.upcomingRegisteredEvents.length}\n`
+        }
+        if (analytics.barangayParticipation) {
+          contextString += `Events in user's barangay: ${analytics.barangayParticipation.eventCount}\n`
+        }
+        contextString += `\n`
+      }
+
+      // Add personalized recommendations if available
+      if (contextData.userData.personalizedRecommendations && contextData.userData.personalizedRecommendations.length > 0) {
+        contextString += `Personalized Event Recommendations:\n`
+        contextData.userData.personalizedRecommendations.forEach((event: any, index: number) => {
+          if (event.date) {
+            contextString += `${index + 1}. "${event.title}" on ${new Date(event.date).toLocaleDateString()} at ${event.location} (Score: ${event.score})\n`
+          }
+        })
+        contextString += `\n`
+      }
+
+      if (contextData.userData.barangayEvents.length > 0) {
+        contextString += `Upcoming Events in User's Barangay (${userBarangay}):\n`
+        contextData.userData.barangayEvents.forEach((event: any, index: number) => {
+          if (event.date) {
+            contextString += `${index + 1}. "${event.title}" on ${new Date(event.date).toLocaleDateString()} at ${event.location}. ${event.description}\n`
+          }
+        })
+        contextString += `\n`
+      }
+    }
+
     if (contextData.upcomingEvents.length > 0) {
       contextString += "Upcoming Events:\n"
       contextData.upcomingEvents.forEach((event, index) => {
-        contextString += `${index + 1}. "${event.title}" on ${new Date(event.date).toLocaleDateString()} at ${event.location}. ${event.description}\n`
+        if (event.date) {
+          contextString += `${index + 1}. "${event.title}" on ${new Date(event.date).toLocaleDateString()} at ${event.location}. ${event.description}\n`
+        }
       })
       contextString += "\n"
+    }
+
+    // Add comprehensive event data if available
+    if (contextData.allEvents && contextData.allEvents.length > 0) {
+      contextString += "All Available Events in Database:\n"
+      contextData.allEvents.forEach((event, index) => {
+        if (event.date) {
+          const eventDate = new Date(event.date)
+          const isUpcoming = eventDate >= new Date()
+          const status = isUpcoming ? "Upcoming" : "Past"
+          contextString += `${index + 1}. "${event.title}" on ${eventDate.toLocaleDateString()} at ${event.location} (${status})\n`
+        }
+      })
+      contextString += `\nTotal events in database: ${contextData.allEvents.length}\n`
+      contextString += `Upcoming events: ${contextData.upcomingEvents.length}\n`
+      contextString += `\n`
+    }
+
+    // Add month-specific events if available
+    if (contextData.monthSpecificEvents) {
+      const { month, year, events } = contextData.monthSpecificEvents
+      contextString += `Events in ${month.charAt(0).toUpperCase() + month.slice(1)} ${year}:\n`
+      if (events.length > 0) {
+        events.forEach((event, index) => {
+          if (event.date) {
+            contextString += `${index + 1}. "${event.title}" on ${new Date(event.date).toLocaleDateString()} at ${event.location}. ${event.description}\n`
+          }
+        })
+      } else {
+        contextString += `No events found for ${month} ${year}\n`
+      }
+      contextString += `\n`
     }
 
     if (contextData.latestAnnouncements.length > 0) {
@@ -167,7 +408,9 @@ export async function POST(req: Request) {
     if (contextData.searchResults.events.length > 0) {
       contextString += "Relevant Events:\n"
       contextData.searchResults.events.forEach((event, index) => {
-        contextString += `${index + 1}. "${event.title}" on ${new Date(event.date).toLocaleDateString()} at ${event.location}. ${event.description}\n`
+        if (event.date) {
+          contextString += `${index + 1}. "${event.title}" on ${new Date(event.date).toLocaleDateString()} at ${event.location}. ${event.description}\n`
+        }
       })
       contextString += "\n"
     }
@@ -214,6 +457,10 @@ export async function POST(req: Request) {
 
    IMPORTANT: When asked about popular events or participant counts, ALWAYS provide the EXACT numbers from the data provided. Do not say "the exact number is not available" - use the precise participant counts given in the context.
 
+   PERSONALIZATION: If user information is provided, use it to give personalized recommendations. Reference their past event participation, preferences, and barangay-specific events when making suggestions.
+
+   DATA AVAILABILITY: You have access to comprehensive event data from the database. Always provide information about ALL available events when asked, not just a limited subset. If asked about specific time periods (like August), check the complete event list and provide accurate information about what's available.
+
    You have access to the following data from the SK Federation database:
    ${contextString}
    
@@ -227,7 +474,9 @@ export async function POST(req: Request) {
    - For event details, include the date, location, and description
    - For announcements, include the title and description.
    - If the user asks for more details about a specific event or announcement, suggest they visit the SK Federation website or contact the organizer
-   - When suggesting new events, make them creative but relevant to the SK Federation's mission and past successful events`
+   - When suggesting new events, make them creative but relevant to the SK Federation's mission and past successful events
+   - If user data is available, provide personalized recommendations based on their event history and preferences
+   - When asked about specific months or time periods, check ALL available events and provide comprehensive information about what's available in that timeframe`
 
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
@@ -254,6 +503,12 @@ export async function POST(req: Request) {
 
     if (!response.ok) {
       const errorText = await response.text()
+      // Check for rate limit error
+      if (errorText.includes('Rate limit reached')) {
+        return NextResponse.json({
+          error: 'The AI is currently busy. Please slow down and try your request again in a few seconds.'
+        }, { status: 429 })
+      }
       console.error(`Groq API error (${response.status}):`, errorText)
       try {
         const errorJson = JSON.parse(errorText)
