@@ -41,13 +41,13 @@ export function ImageCarousel({ images, autoplayInterval = 5000, className }: Ca
 
   return (
     <div className={cn("relative w-full overflow-hidden", className)}>
-      {/* Carousel container - Reduced height to minimize empty space */}
-      <div className="relative w-full h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px] xl:h-[500px] 2xl:h-[550px] overflow-hidden bg-gray-100">
+      {/* Carousel container - Optimized height to match image aspect ratio */}
+      <div className="relative w-full h-[250px] sm:h-[300px] md:h-[350px] lg:h-[400px] xl:h-[450px] 2xl:h-[500px] overflow-hidden">
         {images.map((image, index) => (
           <div
             key={index}
             className={cn(
-              "absolute inset-0 h-full w-full transform transition-transform duration-700 ease-in-out flex items-center justify-center",
+              "absolute inset-0 h-full w-full transform transition-transform duration-700 ease-in-out",
               index === currentIndex
                 ? "translate-x-0"
                 : index < currentIndex
@@ -59,7 +59,7 @@ export function ImageCarousel({ images, autoplayInterval = 5000, className }: Ca
               src={image.src || "/placeholder.svg"}
               alt={image.alt}
               fill
-              className="object-contain"
+              className="object-cover"
               priority={index === 0}
               sizes="100vw"
               quality={90}
