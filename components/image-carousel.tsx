@@ -41,8 +41,8 @@ export function ImageCarousel({ images, autoplayInterval = 5000, className }: Ca
 
   return (
     <div className={cn("relative w-full overflow-hidden", className)}>
-      {/* Carousel container */}
-      <div className="relative h-[400px] md:h-[500px] lg:h-[600px] w-full overflow-hidden">
+      {/* Carousel container - Full width and responsive height */}
+      <div className="relative w-full h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] xl:h-[800px] 2xl:h-[900px] overflow-hidden">
         {images.map((image, index) => (
           <div
             key={index}
@@ -59,8 +59,10 @@ export function ImageCarousel({ images, autoplayInterval = 5000, className }: Ca
               src={image.src || "/placeholder.svg"}
               alt={image.alt}
               fill
-              className="object-cover"
+              className="object-contain sm:object-cover"
               priority={index === 0}
+              sizes="100vw"
+              quality={90}
             />
           </div>
         ))}
@@ -69,14 +71,14 @@ export function ImageCarousel({ images, autoplayInterval = 5000, className }: Ca
       {/* Navigation arrows */}
       <button
         onClick={goToPrevious}
-        className="absolute left-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/30 p-2 text-white hover:bg-black/50"
+        className="absolute left-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/30 p-2 text-white hover:bg-black/50 transition-colors"
         aria-label="Previous slide"
       >
         <ChevronLeft className="h-6 w-6" />
       </button>
       <button
         onClick={goToNext}
-        className="absolute right-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/30 p-2 text-white hover:bg-black/50"
+        className="absolute right-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/30 p-2 text-white hover:bg-black/50 transition-colors"
         aria-label="Next slide"
       >
         <ChevronRight className="h-6 w-6" />

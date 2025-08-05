@@ -201,9 +201,9 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Main Content */}
-      {/* Hero Section with Carousel */}
-      <section>
-        <ImageCarousel images={carouselImages} />
+      {/* Hero Section with Carousel - Full width */}
+      <section className="w-full">
+        <ImageCarousel images={carouselImages} className="w-full" />
       </section>
 
       {/* Welcome Section - Now below the carousel */}
