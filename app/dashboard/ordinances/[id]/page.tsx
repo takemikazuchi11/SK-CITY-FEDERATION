@@ -7,6 +7,9 @@ import { ArrowLeft, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { getOrdinanceById, getResolutionById } from "@/lib/ordinance-service"
+import { PermissionGuard } from "@/components/role-based-ui"
+import { EditOrdinanceModal } from "@/components/admin/edit-ordinance-modal"
+import { DeleteOrdinanceModal } from "@/components/admin/delete-ordinance-modal"
 
 export default function OrdinancePage() {
   const params = useParams()
@@ -17,65 +20,43 @@ export default function OrdinancePage() {
   const [error, setError] = useState<string | null>(null)
   const isResolution = ordinanceId.startsWith("resolution-")
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        setLoading(true)
-        let data
+  const refreshDocument = async () => {
+    try {
+      setLoading(true)
+      let data
 
-        if (isResolution) {
-          // Extract the resolution number from the ID
-          const resolutionNo = ordinanceId.replace("resolution-", "")
-          data = await getResolutionById(resolutionNo)
-
-          if (data) {
-            // Format the data to match our component's expectations
-            setDocument({
-              id: data.resolution_no,
-              title: data.title,
-              description: data.description,
-              author: data.author || "Unknown Author",
-              authorImage: data.img || "/placeholder.svg?height=200&width=200",
-              sponsors: data.sponsors || [],
-              date: data.date,
-              dateEnacted: data.date_enact,
-              pdfUrl: data.pdf || "/sample-ordinance.pdf",
-              isResolution: true,
-            })
-          }
-        } else {
-          // It's an ordinance
-          data = await getOrdinanceById(ordinanceId)
-
-          if (data) {
-            // Format the data to match our component's expectations
-            setDocument({
-              id: data.ordinance_no,
-              title: data.title,
-              description: data.description,
-              author: data.author || "Unknown Author",
-              authorImage: data.img || "/placeholder.svg?height=200&width=200",
-              sponsors: data.sponsors || [],
-              date: data.date,
-              dateEnacted: data.date_enact,
-              pdfUrl: data.pdf || "/sample-ordinance.pdf",
-              isResolution: false,
-            })
-          }
-        }
-
-        if (!data) {
-          setError("Document not found")
-        }
-      } catch (err) {
-        console.error("Error fetching document:", err)
-        setError("Failed to load document. Please try again later.")
-      } finally {
-        setLoading(false)
+      if (isResolution) {
+        const resolutionNo = ordinanceId.replace("resolution-", "")
+        data = await getResolutionById(resolutionNo)
+      } else {
+        data = await getOrdinanceById(ordinanceId)
       }
-    }
 
-    fetchData()
+      if (data) {
+        setDocument({
+          id: isResolution ? data.resolution_no : data.ordinance_no,
+          title: data.title,
+          description: data.description,
+          author: data.author || "Unknown Author",
+          authorImage: data.img || "/placeholder.svg?height=200&width=200",
+          sponsors: data.sponsors || [],
+          date: data.date,
+          dateEnacted: data.date_enact,
+          pdfUrl: data.pdf || "/sample-ordinance.pdf",
+          isResolution: isResolution,
+          ...data, // Include the original data for the modals
+        })
+      }
+    } catch (err) {
+      console.error("Error refreshing document:", err)
+      setError("Failed to refresh document. Please try again later.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    refreshDocument()
   }, [ordinanceId, isResolution])
 
   if (loading) {
@@ -178,6 +159,24 @@ export default function OrdinancePage() {
                   Click to download
                 </Button>
               </div>
+
+              {/* Admin Controls */}
+              <PermissionGuard permission="manage:legislative_documents">
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Admin Controls</h3>
+                  <div className="flex gap-2">
+                    <EditOrdinanceModal 
+                      document={document} 
+                      isResolution={document.isResolution} 
+                      onUpdate={refreshDocument}
+                    />
+                    <DeleteOrdinanceModal 
+                      document={document} 
+                      isResolution={document.isResolution} 
+                    />
+                  </div>
+                </div>
+              </PermissionGuard>
             </div>
 
             {/* Right Column - PDF Viewer */}

@@ -195,3 +195,155 @@ export async function searchResolutions(query: string) {
     throw error
   }
 }
+
+/**
+ * Update an ordinance by its ID
+ * @param id The ordinance number to update
+ * @param updates The fields to update
+ * @returns The updated ordinance object
+ */
+export async function updateOrdinance(id: string, updates: Partial<Ordinance>) {
+  try {
+    const { data, error } = await supabase
+      .from("ordinance")
+      .update(updates)
+      .eq("ordinance_no", id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error("Error updating ordinance:", error)
+      throw error
+    }
+
+    return data as Ordinance
+  } catch (error) {
+    console.error(`Exception in updateOrdinance for ID ${id}:`, error)
+    throw error
+  }
+}
+
+/**
+ * Update a resolution by its ID
+ * @param id The resolution number to update
+ * @param updates The fields to update
+ * @returns The updated resolution object
+ */
+export async function updateResolution(id: string, updates: Partial<Resolution>) {
+  try {
+    const { data, error } = await supabase
+      .from("resolution")
+      .update(updates)
+      .eq("resolution_no", id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error("Error updating resolution:", error)
+      throw error
+    }
+
+    return data as Resolution
+  } catch (error) {
+    console.error(`Exception in updateResolution for ID ${id}:`, error)
+    throw error
+  }
+}
+
+/**
+ * Delete an ordinance by its ID
+ * @param id The ordinance number to delete
+ * @returns Success status
+ */
+export async function deleteOrdinance(id: string) {
+  try {
+    const { error } = await supabase
+      .from("ordinance")
+      .delete()
+      .eq("ordinance_no", id)
+
+    if (error) {
+      console.error("Error deleting ordinance:", error)
+      throw error
+    }
+
+    return true
+  } catch (error) {
+    console.error(`Exception in deleteOrdinance for ID ${id}:`, error)
+    throw error
+  }
+}
+
+/**
+ * Delete a resolution by its ID
+ * @param id The resolution number to delete
+ * @returns Success status
+ */
+export async function deleteResolution(id: string) {
+  try {
+    const { error } = await supabase
+      .from("resolution")
+      .delete()
+      .eq("resolution_no", id)
+
+    if (error) {
+      console.error("Error deleting resolution:", error)
+      throw error
+    }
+
+    return true
+  } catch (error) {
+    console.error(`Exception in deleteResolution for ID ${id}:`, error)
+    throw error
+  }
+}
+
+/**
+ * Create a new ordinance
+ * @param ordinanceData The ordinance data to create
+ * @returns The created ordinance object
+ */
+export async function createOrdinance(ordinanceData: Omit<Ordinance, "id" | "created_at">) {
+  try {
+    const { data, error } = await supabase
+      .from("ordinance")
+      .insert(ordinanceData)
+      .select()
+      .single()
+
+    if (error) {
+      console.error("Error creating ordinance:", error)
+      throw error
+    }
+
+    return data as Ordinance
+  } catch (error) {
+    console.error("Exception in createOrdinance:", error)
+    throw error
+  }
+}
+
+/**
+ * Create a new resolution
+ * @param resolutionData The resolution data to create
+ * @returns The created resolution object
+ */
+export async function createResolution(resolutionData: Omit<Resolution, "id" | "created_at">) {
+  try {
+    const { data, error } = await supabase
+      .from("resolution")
+      .insert(resolutionData)
+      .select()
+      .single()
+
+    if (error) {
+      console.error("Error creating resolution:", error)
+      throw error
+    }
+
+    return data as Resolution
+  } catch (error) {
+    console.error("Exception in createResolution:", error)
+    throw error
+  }
+}

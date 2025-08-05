@@ -4,11 +4,13 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { FileText, Search } from "lucide-react"
+import { FileText, Search, Plus } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { getOrdinances, getResolutions, searchOrdinances, searchResolutions } from "@/lib/ordinance-service"
+import { PermissionGuard } from "@/components/role-based-ui"
 
 export default function OrdinancesPage({ searchParams }: { searchParams: { type?: string; q?: string } }) {
   const defaultTab = searchParams.type === "resolution" ? "resolutions" : "ordinances"
@@ -67,15 +69,34 @@ export default function OrdinancesPage({ searchParams }: { searchParams: { type?
           </p>
         </div>
 
-        <form onSubmit={handleSearch} className="mt-4 md:mt-0 relative w-full md:w-64">
-          <Input
-            placeholder="Search..."
-            className="pl-10"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-        </form>
+        <div className="mt-4 md:mt-0 flex flex-col sm:flex-row gap-4 items-center">
+          <form onSubmit={handleSearch} className="relative w-full sm:w-64">
+            <Input
+              placeholder="Search..."
+              className="pl-10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          </form>
+          
+          <PermissionGuard permission="manage:legislative_documents">
+            <div className="flex gap-2">
+              <Link href="/dashboard/ordinances/create">
+                <Button className="flex items-center gap-2">
+                  <Plus size={16} />
+                  New Ordinance
+                </Button>
+              </Link>
+              <Link href="/dashboard/ordinances/create-resolution">
+                <Button variant="outline" className="flex items-center gap-2">
+                  <Plus size={16} />
+                  New Resolution
+                </Button>
+              </Link>
+            </div>
+          </PermissionGuard>
+        </div>
       </div>
 
       {error && (
