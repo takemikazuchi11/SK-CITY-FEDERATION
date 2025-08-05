@@ -42,7 +42,7 @@ export function ImageCarousel({ images, autoplayInterval = 5000, className }: Ca
   return (
     <div className={cn("relative w-full overflow-hidden", className)}>
       {/* Carousel container */}
-      <div className="relative h-[500px] w-full overflow-hidden">
+      <div className="relative h-[400px] md:h-[500px] lg:h-[600px] w-full overflow-hidden">
         {images.map((image, index) => (
           <div
             key={index}
