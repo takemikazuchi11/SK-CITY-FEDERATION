@@ -10,6 +10,10 @@ import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/lib/auth-context"
 import { Loader2, Plus, Search } from "lucide-react"
 import { PermissionGuard } from "@/components/role-based-ui"
+import { useRouter } from "next/navigation";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Pencil, Trash2 } from "lucide-react";
+import { updateAnnouncement, deleteAnnouncement } from "@/lib/supabase";
 
 type Announcement = {
   id: string
@@ -19,6 +23,7 @@ type Announcement = {
   created_by: string
   image_url?: string
   audience?: string
+  category?: string; // Added for poll announcements
 }
 
 export default function AnnouncementsPage() {
@@ -27,6 +32,10 @@ export default function AnnouncementsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [isLoading, setIsLoading] = useState(true)
   const { user } = useAuth()
+  const router = useRouter();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [announcementToDelete, setAnnouncementToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchAnnouncements = async () => {
@@ -82,6 +91,38 @@ export default function AnnouncementsPage() {
     }).format(date)
   }
 
+  // Open edit page with pre-populated data
+  const handleEditClick = (announcement: Announcement) => {
+    // If poll, redirect to create-poll, else to create
+    const isPoll = announcement.category === "poll";
+    const basePath = isPoll ? "/dashboard/announcement/create-poll" : "/dashboard/announcement/create";
+    // Pass id and data as query params
+    const params = new URLSearchParams({
+      id: announcement.id,
+      title: announcement.title,
+      content: announcement.content,
+      ...(announcement.audience ? { audience: announcement.audience } : {})
+    });
+    router.push(`${basePath}?${params.toString()}`);
+  };
+
+  // Delete announcement
+  const handleDelete = async () => {
+    if (!announcementToDelete) return;
+    setIsDeleting(true);
+    try {
+      await deleteAnnouncement(announcementToDelete);
+      setAnnouncements((prev) => prev.filter((a) => a.id !== announcementToDelete));
+      setFilteredAnnouncements((prev) => prev.filter((a) => a.id !== announcementToDelete));
+      setDeleteDialogOpen(false);
+    } catch (err) {
+      alert("Failed to delete announcement. Please try again.");
+    } finally {
+      setIsDeleting(false);
+      setAnnouncementToDelete(null);
+    }
+  };
+
   return (
     <div className="container mx-auto py-10 px-4">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -133,31 +174,47 @@ export default function AnnouncementsPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredAnnouncements.map((announcement) => (
-                <Link href={`/dashboard/announcement/${announcement.id}`} key={announcement.id}>
-                  <Card className="h-full hover:shadow-md transition-shadow">
-                    {announcement.image_url && (
-                      <div className="w-full h-48 overflow-hidden">
-                        <img
-                          src={announcement.image_url || "/placeholder.svg?height=192&width=384"}
-                          alt={announcement.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    <CardHeader>
-                      <CardTitle className="line-clamp-2">{announcement.title}</CardTitle>
-                      <CardDescription>{formatDate(announcement.created_at)}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="line-clamp-3 text-gray-600">{announcement.content}</p>
-                    </CardContent>
-                    <CardFooter>
-                      <Button variant="outline" className="w-full bg-blue-600 text-white hover:bg-blue-700">
-                        Read More
+                <Card key={announcement.id} className="h-full hover:shadow-md transition-shadow relative">
+                  {announcement.image_url && (
+                    <div className="w-full h-48 overflow-hidden">
+                      <img
+                        src={announcement.image_url || "/placeholder.svg?height=192&width=384"}
+                        alt={announcement.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <CardHeader>
+                    <CardTitle className="line-clamp-2">{announcement.title}</CardTitle>
+                    <CardDescription>{formatDate(announcement.created_at)}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="line-clamp-3 text-gray-600">{announcement.content}</p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button variant="outline" className="w-full bg-blue-600 text-white hover:bg-blue-700">
+                      Read More
+                    </Button>
+                  </CardFooter>
+                  {/* Admin controls */}
+                  {user && (user.user_role === "admin" || user.user_role === "moderator") && (
+                    <div className="absolute right-4 top-4 flex gap-2 z-10">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditClick(announcement)}>
+                        <Pencil className="h-4 w-4" />
+                        <span className="sr-only">Edit</span>
                       </Button>
-                    </CardFooter>
-                  </Card>
-                </Link>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => { setAnnouncementToDelete(announcement.id); setDeleteDialogOpen(true); }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Delete</span>
+                      </Button>
+                    </div>
+                  )}
+                </Card>
               ))}
             </div>
           )}
@@ -205,6 +262,23 @@ export default function AnnouncementsPage() {
           )}
         </TabsContent>
       </Tabs>
+      {/* Delete Announcement Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the announcement and all associated comments.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={isDeleting} className="bg-destructive text-white">
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

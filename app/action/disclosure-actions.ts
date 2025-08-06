@@ -8,7 +8,7 @@ export type DisclosureUrl = {
   url: string | null
   description: string | null
   updated_by: string | null
-  updated_at: string
+  updated_at: string | null
 }
 
 export async function getDisclosureUrls(): Promise<DisclosureUrl[]> {

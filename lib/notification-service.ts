@@ -6,13 +6,12 @@ export interface Notification {
   user_id: string
   title: string
   content: string
-  type: "event" | "announcement" | "recommendation"
-  reference_id?: string
-  created_at: string
-  read: boolean
-  image_url?: string
-  action_url?: string
-  metadata?: Record<string, any> // For storing additional information
+  type: string
+  reference_id?: string | null
+  created_at: string | null
+  read: boolean | null
+  image_url?: string | null
+  action_url?: string | null
 }
 
 /**
@@ -41,7 +40,7 @@ export async function getUserNotifications(userId: string): Promise<Notification
       }
       // Filter out old announcements
       if (notification.type === "announcement") {
-        const notificationDate = new Date(notification.created_at)
+        const notificationDate = new Date(notification.created_at || "")
         if (isAfter(sevenDaysAgo, notificationDate)) {
           return false
         }
@@ -308,39 +307,28 @@ export async function generateAnnouncementNotifications(userId: string): Promise
  */
 export async function shouldGenerateRecommendations(userId: string): Promise<boolean> {
   try {
-    // Look for a recommendation tracker notification
+    // Check if we have a recent tracker notification
     const { data, error } = await supabase
       .from("notifications")
-      .select("created_at, metadata")
+      .select("created_at")
       .eq("user_id", userId)
-      .eq("type", "recommendation_tracker")
+      .eq("title", "RECOMMENDATION_TRACKER")
       .order("created_at", { ascending: false })
       .limit(1)
 
     if (error) throw error
 
-    // If we have a record, check if it's less than 5 days old
-    if (data && data.length > 0) {
-      // If there's a deletion date in metadata, use that instead
-      if (data[0].metadata?.recommendations_deleted_at) {
-        const deletionDate = new Date(data[0].metadata.recommendations_deleted_at)
-        // If recommendations were deleted less than 5 days ago, don't regenerate
-        const fiveDaysAfterDeletion = addDays(deletionDate, 5)
-        if (new Date() < fiveDaysAfterDeletion) {
-          console.log("Recommendations were deleted less than 5 days ago, not regenerating yet")
-          return false
-        }
-        // If it's been more than 5 days since deletion, we can regenerate
-        return true
-      }
+    if (!data || data.length === 0) {
+      // No tracker found, so we should generate recommendations
+      return true
+    }
 
-      // Otherwise use the creation date
-      const lastDate = new Date(data[0].created_at)
-      const fiveDaysAgo = subDays(new Date(), 5)
-      if (lastDate > fiveDaysAgo) {
-        // It's been less than 5 days since the last recommendation generation
-        return false
-      }
+    // Check if it's been at least 5 days since the last generation
+    const lastDate = new Date(data[0].created_at || "")
+    const fiveDaysAgo = subDays(new Date(), 5)
+    if (lastDate > fiveDaysAgo) {
+      // It's been less than 5 days since the last recommendation generation
+      return false
     }
 
     return true
@@ -363,10 +351,6 @@ export async function updateRecommendationTracker(userId: string, wasDeleted = f
       content: "This is a system notification to track recommendation generation and deletion.",
       type: "recommendation_tracker" as any,
       read: true, // Hidden from UI
-      metadata: {
-        generation_date: new Date().toISOString(),
-        recommendations_deleted_at: wasDeleted ? new Date().toISOString() : null,
-      },
     }
 
     const { error } = await supabase.from("notifications").insert([tracker])

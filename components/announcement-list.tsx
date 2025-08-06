@@ -371,23 +371,6 @@ export default function AnnouncementList() {
                     </p>
                   </CardContent>
                 </Link>
-                {isAdmin && (
-                  <div className="absolute right-4 top-4 flex gap-2 z-10">
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditClick(announcement)}>
-                      <Pencil className="h-4 w-4" />
-                      <span className="sr-only">Edit</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={(e) => handleDeleteClick(e, announcement.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Delete</span>
-                    </Button>
-                  </div>
-                )}
                 {pollData ? (
                   <div className="mt-4">
                     <div className="font-semibold mb-2">{pollData.poll.question}</div>

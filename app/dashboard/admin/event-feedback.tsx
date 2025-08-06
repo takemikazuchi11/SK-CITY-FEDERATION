@@ -3,12 +3,31 @@
 import { useEffect, useState } from "react"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { supabase } from "@/lib/supabase"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Download, Search, ChevronLeft, ChevronRight, Filter } from "lucide-react"
+import { Download, Search, ChevronLeft, ChevronRight, Filter, MoreHorizontal, Trash2, Mail } from "lucide-react"
+import { toast } from "sonner"
 
 const feedbackPerPage = 10
 
@@ -21,6 +40,9 @@ export default function EventFeedbackAdminTable() {
   const [events, setEvents] = useState<{ id: string; title: string }[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [feedbackToDelete, setFeedbackToDelete] = useState<any>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     fetchEvents()
@@ -67,6 +89,64 @@ export default function EventFeedbackAdminTable() {
       setTotalPages(count ? Math.ceil(count / feedbackPerPage) : 1)
     }
     setLoading(false)
+  }
+
+  const handleDeleteFeedback = (feedbackItem: any) => {
+    setFeedbackToDelete(feedbackItem)
+    setDeleteDialogOpen(true)
+  }
+
+  const confirmDeleteFeedback = async () => {
+    if (!feedbackToDelete) return
+
+    setIsDeleting(true)
+    try {
+      const { error } = await supabase
+        .from("event_feedback")
+        .delete()
+        .eq("id", feedbackToDelete.id)
+
+      if (error) {
+        console.error("Error deleting feedback:", error)
+        toast.error("Failed to delete feedback")
+        return
+      }
+
+      toast.success("Feedback deleted successfully")
+      fetchFeedback() // Refresh the list
+    } catch (error) {
+      console.error("Error deleting feedback:", error)
+      toast.error("An unexpected error occurred")
+    } finally {
+      setIsDeleting(false)
+      setDeleteDialogOpen(false)
+      setFeedbackToDelete(null)
+    }
+  }
+
+  const handleSendEmail = (feedbackItem: any) => {
+    const userEmail = feedbackItem.users?.email
+    if (!userEmail) {
+      toast.error("User email not found")
+      return
+    }
+
+    // Open default email client with pre-filled content
+    const subject = encodeURIComponent(`Response to your feedback for ${feedbackItem.events?.title}`)
+    const body = encodeURIComponent(`Dear ${feedbackItem.users?.first_name || 'User'},
+
+Thank you for your feedback on the event "${feedbackItem.events?.title}".
+
+Your rating: ${feedbackItem.rating}/5
+Your comments: ${feedbackItem.comments || 'No comments provided'}
+
+We appreciate your input and will use it to improve future events.
+
+Best regards,
+SKCF Admin Team`)
+
+    window.open(`mailto:${userEmail}?subject=${subject}&body=${body}`, '_blank')
+    toast.success("Email client opened")
   }
 
   function handleExportCSV() {
@@ -164,16 +244,17 @@ export default function EventFeedbackAdminTable() {
                   <TableHead>Rating</TableHead>
                   <TableHead>Comments</TableHead>
                   <TableHead>Date</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">Loading feedback...</TableCell>
+                    <TableCell colSpan={6} className="text-center py-8">Loading feedback...</TableCell>
                   </TableRow>
                 ) : feedback.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">No feedback submitted yet.</TableCell>
+                    <TableCell colSpan={6} className="text-center py-8">No feedback submitted yet.</TableCell>
                   </TableRow>
                 ) : (
                   feedback.map(fb => (
@@ -189,6 +270,35 @@ export default function EventFeedbackAdminTable() {
                         </div>
                       </TableCell>
                       <TableCell>{new Date(fb.created_at).toLocaleString()}</TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">Open menu</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="flex items-center gap-2 cursor-pointer"
+                              onClick={() => handleSendEmail(fb)}
+                            >
+                              <Mail className="h-4 w-4" />
+                              <span>Send Email</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                              className="flex items-center gap-2 text-red-600 cursor-pointer"
+                              onClick={() => handleDeleteFeedback(fb)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              <span>Delete Feedback</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
                     </TableRow>
                   ))
                 )}
@@ -217,6 +327,28 @@ export default function EventFeedbackAdminTable() {
           </div>
         </div>
       </CardContent>
+
+      {/* Delete Feedback Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Feedback</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this feedback? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDeleteFeedback}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? "Deleting..." : "Delete Feedback"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   )
 } 

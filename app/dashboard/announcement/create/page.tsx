@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowLeft, Mail } from "lucide-react"
 import Link from "next/link"
-import { createAnnouncement } from "@/lib/supabase"
+import { createAnnouncement, getAnnouncementById, updateAnnouncement } from "@/lib/supabase"
 import { sendEmailNotification } from "@/app/action/email"
 import { useToast } from "@/components/ui/use-toast"
 import { useAuth } from "@/lib/auth-context"
@@ -23,6 +23,7 @@ import { UserSelectionList } from "@/components/admin/user-selection-list"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { useLoading } from "@/lib/loading-context";
+import { useSearchParams } from "next/navigation";
 
 export default function CreateAnnouncement() {
   const router = useRouter()
@@ -43,6 +44,20 @@ export default function CreateAnnouncement() {
     recipients?: string[]
     failed?: string[]
   }>({ status: "idle" })
+
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("id");
+  // Populate form if editing
+  useEffect(() => {
+    if (editId) {
+      (async () => {
+        const data = await getAnnouncementById(editId);
+        setTitle(data.title || "");
+        setContent(data.content || "");
+        setCategory(data.category || "general");
+      })();
+    }
+  }, [editId]);
 
   useEffect(() => {
     // Redirect if not admin
@@ -89,19 +104,31 @@ export default function CreateAnnouncement() {
     try {
       setIsSubmitting(true)
 
-      const newAnnouncement = await createAnnouncement({
-        title,
-        content,
-        author: `${user.first_name} ${user.last_name}`,
-        author_role: user.user_role,
-        category,
-        user_id: user.id,
-      })
-
-      toast({
-        title: "Announcement created",
-        description: "Your announcement has been published successfully",
-      })
+      let announcementResult;
+      if (editId) {
+        // Update existing
+        announcementResult = await updateAnnouncement(editId, { title, content, category });
+        toast({
+          title: "Announcement updated",
+          description: "Your announcement has been updated successfully",
+        });
+        router.push("/dashboard/announcement");
+        return;
+      } else {
+        // Create new
+        announcementResult = await createAnnouncement({
+          title,
+          content,
+          author: `${user.first_name} ${user.last_name}`,
+          author_role: user.user_role,
+          category,
+          user_id: user.id,
+        });
+        toast({
+          title: "Announcement created",
+          description: "Your announcement has been published successfully",
+        });
+      }
 
       // If not sending notification, redirect immediately
       if (!sendNotification) {
@@ -115,7 +142,7 @@ export default function CreateAnnouncement() {
       // Determine which emails to send to based on the notification mode
       const emailsToSend = notificationMode === "selected" ? selectedUsers : undefined
 
-      const result = await sendEmailNotification(newAnnouncement, emailsToSend)
+      const result = await sendEmailNotification(announcementResult, emailsToSend)
 
       setNotificationStatus({
         status: result.success ? "success" : "error",
@@ -276,7 +303,13 @@ export default function CreateAnnouncement() {
                   (sendNotification && notificationMode === "selected" && selectedUsers.length === 0)
                 }
               >
-                {isSubmitting || notificationStatus.status === "sending" ? "Publishing..." : "Publish Announcement"}
+                {editId
+                  ? isSubmitting || notificationStatus.status === "sending"
+                    ? "Saving..."
+                    : "Edit Announcement"
+                  : isSubmitting || notificationStatus.status === "sending"
+                    ? "Publishing..."
+                    : "Publish Announcement"}
               </Button>
             </CardFooter>
           </form>

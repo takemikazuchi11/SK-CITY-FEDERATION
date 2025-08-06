@@ -12,9 +12,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { MoreHorizontal, Search, UserX, UserCog, Mail, Download, ChevronLeft, ChevronRight, Filter } from "lucide-react"
+import { MoreHorizontal, Search, UserX, UserCog, Mail, Download, ChevronLeft, ChevronRight, Filter, Trash2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { supabase } from "@/lib/supabase"
 import { format } from "date-fns"
@@ -28,8 +36,8 @@ interface User {
   first_name: string
   last_name: string
   user_role: string
-  barangay?: string
-  created_at: string
+  barangay?: string | null
+  created_at?: string | null
 }
 
 export function UserManagementTable() {
@@ -43,12 +51,28 @@ export function UserManagementTable() {
   const [roleFilter, setRoleFilter] = useState<string>("all")
   const [barangayFilter, setBarangayFilter] = useState<string>("all")
   const [barangays, setBarangays] = useState<string[]>([])
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [userToDelete, setUserToDelete] = useState<any>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [tableKey, setTableKey] = useState(0)
   const usersPerPage = 10
 
   useEffect(() => {
     fetchUsers()
     fetchBarangays()
   }, [currentPage, searchQuery, roleFilter, barangayFilter])
+
+  // Cleanup effect to prevent aria-hidden issues
+  useEffect(() => {
+    return () => {
+      // Ensure modals are closed when component unmounts
+      setDeleteModalOpen(false)
+      setUserToDelete(null)
+      setIsDeleting(false)
+      setIsEditModalOpen(false)
+      setEditingUser(null)
+    }
+  }, [])
 
   const fetchBarangays = async () => {
     try {
@@ -135,7 +159,7 @@ export function UserManagementTable() {
             user.email,
             user.user_role,
             `"${user.barangay || ""}"`,
-            format(new Date(user.created_at), "yyyy-MM-dd"),
+            format(new Date(user.created_at || ""), "yyyy-MM-dd"),
           ].join(","),
         ),
       ]
@@ -163,6 +187,95 @@ export function UserManagementTable() {
   const handleEditUser = (user: User) => {
     setEditingUser(user)
     setIsEditModalOpen(true)
+  }
+
+  const handleDeleteUser = (user: User) => {
+    setUserToDelete(user)
+    setDeleteModalOpen(true)
+  }
+
+  const closeDeleteModal = () => {
+    setDeleteModalOpen(false)
+    setUserToDelete(null)
+    setIsDeleting(false)
+  }
+
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return
+
+    setIsDeleting(true)
+    try {
+      // First, delete related records to avoid foreign key constraint violations
+      const userId = userToDelete.id
+
+      // Delete user's comments
+      const { error: commentsError } = await supabase
+        .from("comments")
+        .delete()
+        .eq("user_id", userId)
+
+      if (commentsError) {
+        console.error("Error deleting user comments:", commentsError)
+        // Continue anyway, might not have comments
+      }
+
+      // Delete user's event feedback
+      const { error: feedbackError } = await supabase
+        .from("event_feedback")
+        .delete()
+        .eq("user_id", userId)
+
+      if (feedbackError) {
+        console.error("Error deleting user feedback:", feedbackError)
+        // Continue anyway, might not have feedback
+      }
+
+      // Delete user's event participations
+      const { error: participationError } = await supabase
+        .from("event_participants")
+        .delete()
+        .eq("user_id", userId)
+
+      if (participationError) {
+        console.error("Error deleting user participations:", participationError)
+        // Continue anyway, might not have participations
+      }
+
+      // Delete user's KK registrations
+      const { error: kkError } = await supabase
+        .from("kk_registrations")
+        .delete()
+        .eq("user_id", userId)
+
+      if (kkError) {
+        console.error("Error deleting user KK registrations:", kkError)
+        // Continue anyway, might not have KK registrations
+      }
+
+      // Now delete the user from users table
+      const { error: dbError } = await supabase
+        .from("users")
+        .delete()
+        .eq("id", userId)
+
+      if (dbError) {
+        console.error("Error deleting user from database:", dbError)
+        toast.error("Failed to delete user data")
+        return
+      }
+
+      toast.success(`Successfully deleted ${userToDelete.first_name} ${userToDelete.last_name}'s account and all related data`)
+      
+      // Close modal and refresh data
+      closeDeleteModal()
+      setTableKey(prev => prev + 1)
+      await fetchUsers()
+    } catch (error) {
+      console.error("Error deleting user:", error)
+      toast.error("An unexpected error occurred")
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   const getRoleBadgeVariant = (role: string) => {
@@ -232,7 +345,7 @@ export function UserManagementTable() {
       </div>
 
       <div className="rounded-md border">
-        <Table>
+        <Table key={tableKey}>
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
@@ -267,7 +380,7 @@ export function UserManagementTable() {
                     <Badge variant={getRoleBadgeVariant(user.user_role)}>{user.user_role}</Badge>
                   </TableCell>
                   <TableCell>{user.barangay || "—"}</TableCell>
-                  <TableCell>{format(new Date(user.created_at), "MMM d, yyyy")}</TableCell>
+                  <TableCell>{format(new Date(user.created_at || ""), "MMM d, yyyy")}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -291,9 +404,12 @@ export function UserManagementTable() {
                           <span>Send Email</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="flex items-center gap-2 text-red-600">
-                          <UserX className="h-4 w-4" />
-                          <span>Deactivate</span>
+                        <DropdownMenuItem 
+                          className="flex items-center gap-2 text-red-600 cursor-pointer"
+                          onClick={() => handleDeleteUser(user)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span>Delete Account</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -335,6 +451,51 @@ export function UserManagementTable() {
         onClose={() => setIsEditModalOpen(false)}
         onUserUpdated={fetchUsers}
       />
+
+      {/* Delete User Modal */}
+      <Dialog 
+        open={deleteModalOpen} 
+        onOpenChange={(open) => {
+          if (!open) {
+            // Ensure proper cleanup when dialog closes
+            setDeleteModalOpen(false)
+            setUserToDelete(null)
+            setIsDeleting(false)
+          } else {
+            setDeleteModalOpen(true)
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete User Account</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete {userToDelete?.first_name} {userToDelete?.last_name}'s account? 
+              This action cannot be undone and will permanently remove all their data from the system.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setDeleteModalOpen(false)
+                setUserToDelete(null)
+                setIsDeleting(false)
+              }} 
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={confirmDeleteUser}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete Account"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

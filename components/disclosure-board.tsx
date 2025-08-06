@@ -23,6 +23,12 @@ const getIconForDocumentType = (documentType: string) => {
       return FileSpreadsheet
     case "annual budget":
       return FileCog
+    case "quarterly full disclosure":
+      return FileBarChart
+    case "mil":
+      return FileCheck
+    case "coa reports":
+      return FileSearch
     default:
       return FileBarChart
   }
@@ -36,8 +42,15 @@ const getColorForDocumentType = (documentType: string) => {
       return "text-green-600"
     case "annual budget":
       return "text-purple-600"
+    case "quarterly full disclosure":
+      return "text-amber-600"
+    case "mil":
+      return "text-red-600"
+    case "coa reports":
+      return "text-teal-600"
     default:
       return "text-amber-600"
+     
   }
 }
 
@@ -49,6 +62,12 @@ const getButtonColorForDocumentType = (documentType: string) => {
       return "bg-[#3b82f6] hover:bg-[#2563eb]"
     case "annual budget":
       return "bg-[#60a5fa] hover:bg-[#3b82f6]"
+    case "quarterly full disclosure":
+      return "bg-[#1e40af] hover:bg-[#1e3a8a]"
+    case "mil":
+      return "bg-[#dc2626] hover:bg-[#b91c1c]"
+    case "coa reports":
+      return "bg-[#0d9488] hover:bg-[#0f766e]"
     default:
       return "bg-[#1e40af] hover:bg-[#1e3a8a]"
   }
@@ -182,52 +201,6 @@ export default function DisclosureBoard() {
                   })}
                 </div>
               )}
-
-              {/* Static documents that don't require URLs */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                {/* Quarterly Full Disclosure Board */}
-                <div className="bg-white p-5 rounded-md shadow-md transform rotate-[0.5deg] hover:rotate-0 transition-transform duration-300 border border-gray-200 hover:shadow-blue-200 hover:border-blue-200">
-                  <div className="flex flex-col items-center text-center">
-                    <FileBarChart className="h-12 w-12 text-amber-600 mb-3" />
-                    <h3 className="font-bold text-lg mb-2">Quarterly Full Disclosure</h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Quarterly reports on financial transactions, projects, and activities for transparency and
-                      accountability.
-                    </p>
-                    <Link href="#" className="text-[#1e40af] hover:text-[#1e3a8a] font-medium inline-flex items-center" onClick={() => setGlobalLoading(true)}>
-                      see full details <span className="ml-1">→</span>
-                    </Link>
-                  </div>
-                </div>
-
-                {/* MIL */}
-                <div className="bg-white p-5 rounded-md shadow-md transform rotate-[-1deg] hover:rotate-0 transition-transform duration-300 border border-gray-200 hover:shadow-blue-200 hover:border-blue-200">
-                  <div className="flex flex-col items-center text-center">
-                    <FileCheck className="h-12 w-12 text-red-600 mb-3" />
-                    <h3 className="font-bold text-lg mb-2">MIL</h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Monthly Investment and Liquidation reports detailing expenditures and financial activities.
-                    </p>
-                    <Link href="#" className="text-[#1d4ed8] hover:text-[#1e3a8a] font-medium inline-flex items-center" onClick={() => setGlobalLoading(true)}>
-                      see full details <span className="ml-1">→</span>
-                    </Link>
-                  </div>
-                </div>
-
-                {/* COA reports */}
-                <div className="bg-white p-5 rounded-md shadow-md transform rotate-[1deg] hover:rotate-0 transition-transform duration-300 border border-gray-200 hover:shadow-blue-200 hover:border-blue-200">
-                  <div className="flex flex-col items-center text-center">
-                    <FileSearch className="h-12 w-12 text-teal-600 mb-3" />
-                    <h3 className="font-bold text-lg mb-2">COA Reports</h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Commission on Audit reports evaluating financial compliance and management practices.
-                    </p>
-                    <Link href="#" className="text-[#3b82f6] hover:text-[#1e40af] font-medium inline-flex items-center" onClick={() => setGlobalLoading(true)}>
-                      see full details <span className="ml-1">→</span>
-                    </Link>
-                  </div>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </div>

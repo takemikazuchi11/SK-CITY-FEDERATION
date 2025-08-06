@@ -10,6 +10,7 @@ import {createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 export default function KatipunanNgKabataanPage() {
   const [scrollPosition, setScrollPosition] = useState(0)
   const [kkRegistrationCount, setKkRegistrationCount] = useState(0)
+  const [eventsCount, setEventsCount] = useState(0)
   const supabase = createClientComponentClient()
 
   // Sample KK group names for the carousel
@@ -33,24 +34,33 @@ export default function KatipunanNgKabataanPage() {
     return () => clearInterval(interval)
   }, [kkGroups.length])
 
-  // Fetch KK registration count
+  // Fetch KK registration count and events count
   useEffect(() => {
-    async function fetchKkRegistrationCount() {
+    async function fetchCounts() {
       try {
-        const { count, error } = await supabase.from("kk_registrations").select("*", { count: "exact", head: true })
+        // Fetch KK registration count
+        const { count: kkCount, error: kkError } = await supabase.from("kk_registrations").select("*", { count: "exact", head: true })
 
-        if (error) {
-          console.error("Error fetching KK registration count:", error)
-          return
+        if (kkError) {
+          console.error("Error fetching KK registration count:", kkError)
+        } else {
+          setKkRegistrationCount(kkCount || 0)
         }
 
-        setKkRegistrationCount(count || 0)
+        // Fetch total events count
+        const { count: eventsCount, error: eventsError } = await supabase.from("events").select("*", { count: "exact", head: true })
+
+        if (eventsError) {
+          console.error("Error fetching events count:", eventsError)
+        } else {
+          setEventsCount(eventsCount || 0)
+        }
       } catch (error) {
-        console.error("Error fetching KK registration count:", error)
+        console.error("Error fetching counts:", error)
       }
     }
 
-    fetchKkRegistrationCount()
+    fetchCounts()
   }, [supabase])
 
   return (
@@ -177,8 +187,8 @@ export default function KatipunanNgKabataanPage() {
               <div className="flex justify-center mb-2">
                 <Star className="h-8 w-8" />
               </div>
-              <div className="text-4xl font-bold mb-2">42</div>
-              <div className="text-lg">Community Projects</div>
+              <div className="text-4xl font-bold mb-2">{eventsCount > 0 ? eventsCount : "..."}</div>
+              <div className="text-lg">SK Events</div>
             </div>
             <div className="text-center p-4 bg-blue-700/50 rounded-lg">
               <div className="flex justify-center mb-2">
