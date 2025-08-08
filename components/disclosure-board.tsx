@@ -23,12 +23,12 @@ const getIconForDocumentType = (documentType: string) => {
       return FileSpreadsheet
     case "annual budget":
       return FileCog
-    case "quarterly full disclosure":
+      case "quarterly full disclosure":
       return FileBarChart
     case "mil":
       return FileCheck
     case "coa reports":
-      return FileSearch
+      return FileSearch 
     default:
       return FileBarChart
   }
@@ -43,14 +43,13 @@ const getColorForDocumentType = (documentType: string) => {
     case "annual budget":
       return "text-purple-600"
     case "quarterly full disclosure":
-      return "text-amber-600"
+      return "text-blue-800"
     case "mil":
       return "text-red-600"
     case "coa reports":
       return "text-teal-600"
     default:
       return "text-amber-600"
-     
   }
 }
 
@@ -63,11 +62,11 @@ const getButtonColorForDocumentType = (documentType: string) => {
     case "annual budget":
       return "bg-[#60a5fa] hover:bg-[#3b82f6]"
     case "quarterly full disclosure":
-      return "bg-[#1e40af] hover:bg-[#1e3a8a]"
+      return "bg-[#1d4ed8] hover:bg-[#1e40af]"
     case "mil":
-      return "bg-[#dc2626] hover:bg-[#b91c1c]"
+      return "bg-[#f87171] hover:bg-[#ef4444]"
     case "coa reports":
-      return "bg-[#0d9488] hover:bg-[#0f766e]"
+      return "bg-[#34d399] hover:bg-[#10b981]"    
     default:
       return "bg-[#1e40af] hover:bg-[#1e3a8a]"
   }
@@ -201,6 +200,7 @@ export default function DisclosureBoard() {
                   })}
                 </div>
               )}
+
             </CardContent>
           </Card>
         </div>

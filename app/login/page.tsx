@@ -16,6 +16,7 @@ import { MailIcon, LockIcon, UserIcon, MapPinIcon, Eye, EyeOff } from "lucide-re
 import { supabase } from "@/lib/supabase"
 import SK from "@/public/SK-Logo.jpg"
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
 
 // List of barangays in San Juan City
 const BARANGAYS = [
@@ -94,9 +95,10 @@ export default function AuthPage() {
   const [lastName, setLastName] = useState("")
   const [barangay, setBarangay] = useState("")
   const router = useRouter()
-  const { login } = useAuth()
+  const { login, signInWithGoogle } = useAuth()
   const [showLoginPassword, setShowLoginPassword] = useState(false)
   const [showRegisterPassword, setShowRegisterPassword] = useState(false)
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
 
   useEffect(() => {
     // Update active tab when URL parameter changes
@@ -108,14 +110,36 @@ export default function AuthPage() {
     e.preventDefault()
 
     try {
-      const result = await login(email, password)
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("email", email)
+        .eq("password", password)
+        .single()
 
-      if (result.success) {
-        toast.success("Login successful")
-        router.push("/dashboard")
-      } else {
-        toast.error(result.error || "Invalid email or password")
+      if (error || !data) {
+        toast.error("Invalid email or password")
+        return
       }
+
+      // Login successful
+      const userData = {
+        id: data.id,
+        email: data.email,
+        user_role: data.user_role,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        barangay: data.barangay,
+        phone: data.phone,
+        photo_url: data.photo_url,
+        created_at: data.created_at,
+      }
+
+      // Store user data
+      localStorage.setItem("user", JSON.stringify(userData))
+      
+      toast.success("Login successful")
+      router.push("/dashboard")
     } catch (error) {
       console.error("Error during login:", error)
       toast.error("An error occurred during login")
@@ -131,19 +155,6 @@ export default function AuthPage() {
     }
 
     try {
-      // Check if user already exists
-      const { data: existingUser, error: checkError } = await supabase
-        .from("users")
-        .select("*")
-        .eq("email", email)
-        .single()
-
-      if (existingUser) {
-        toast.error("User with this email already exists")
-        return
-      }
-
-      // Create new user
       const { data, error } = await supabase
         .from("users")
         .insert([
@@ -152,26 +163,50 @@ export default function AuthPage() {
             password,
             first_name: firstName,
             last_name: lastName,
-            barangay: barangay, // Store the selected barangay
-            user_role: "user", // Default role for new users
+            barangay,
+            user_role: "user",
           },
         ])
         .select()
 
       if (error) {
-        console.error("Error during registration:", error)
-        toast.error("An error occurred during registration")
+        console.error("Error creating user:", error)
+        toast.error("Failed to create account. Please try again.")
         return
       }
 
-      toast.success("Registration successful! Please log in.")
+      toast.success("Account created successfully! Please log in.")
       setActiveTab("login")
       setIsLogin(true)
+      // Clear form
+      setEmail("")
+      setPassword("")
+      setFirstName("")
+      setLastName("")
+      setBarangay("")
       // Update URL without full page reload
       router.push("/login", { scroll: false })
     } catch (error) {
       console.error("Error during registration:", error)
       toast.error("An error occurred during registration")
+    }
+  }
+
+  const handleGoogleSignIn = async () => {
+    setIsGoogleLoading(true)
+    try {
+      const result = await signInWithGoogle()
+      
+      if (result.success) {
+        toast.success("Redirecting to Google...")
+      } else {
+        toast.error(result.error || "Failed to sign in with Google")
+      }
+    } catch (error) {
+      console.error("Google sign-in error:", error)
+      toast.error("An error occurred during Google sign-in")
+    } finally {
+      setIsGoogleLoading(false)
     }
   }
 
@@ -262,6 +297,47 @@ export default function AuthPage() {
                   Sign in
                 </Button>
               </form>
+
+              <div className="mt-6">
+                <Separator className="my-4" />
+                <div className="text-center text-sm text-gray-500 mb-4">Or continue with</div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleGoogleSignIn}
+                  disabled={isGoogleLoading}
+                >
+                  {isGoogleLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+                      Signing in...
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <svg className="w-5 h-5" viewBox="0 0 24 24">
+                        <path
+                          fill="currentColor"
+                          d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        />
+                        <path
+                          fill="currentColor"
+                          d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        />
+                        <path
+                          fill="currentColor"
+                          d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                        />
+                        <path
+                          fill="currentColor"
+                          d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        />
+                      </svg>
+                      Sign in with Google
+                    </div>
+                  )}
+                </Button>
+              </div>
             </TabsContent>
 
             <TabsContent value="register">
@@ -385,6 +461,47 @@ export default function AuthPage() {
                   Create account
                 </Button>
               </form>
+
+              <div className="mt-6">
+                <Separator className="my-4" />
+                <div className="text-center text-sm text-gray-500 mb-4">Or continue with</div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleGoogleSignIn}
+                  disabled={isGoogleLoading}
+                >
+                  {isGoogleLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+                      Signing up...
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <svg className="w-5 h-5" viewBox="0 0 24 24">
+                        <path
+                          fill="currentColor"
+                          d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        />
+                        <path
+                          fill="currentColor"
+                          d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        />
+                        <path
+                          fill="currentColor"
+                          d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                        />
+                        <path
+                          fill="currentColor"
+                          d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        />
+                      </svg>
+                      Sign up with Google
+                    </div>
+                  )}
+                </Button>
+              </div>
             </TabsContent>
           </Tabs>
 
@@ -393,17 +510,6 @@ export default function AuthPage() {
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t" />
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-gray-500">Or continue with</span>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              <Button variant="outline" className="w-full">
-                Google
-              </Button>
-              <Button variant="outline" className="w-full">
-                GitHub
-              </Button>
             </div>
           </div>
         </CardContent>

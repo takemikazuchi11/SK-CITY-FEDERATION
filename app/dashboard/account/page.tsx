@@ -143,8 +143,15 @@ export default function AccountPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" value={email} disabled />
-                    <p className="text-sm text-muted-foreground">Your email cannot be changed</p>
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      value={email} 
+                      disabled 
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Your email cannot be changed
+                    </p>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone number</Label>

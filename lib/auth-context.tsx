@@ -20,6 +20,7 @@ type AuthContextType = {
   user: User | null
   loading: boolean
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>
+  signInWithGoogle: () => Promise<{ success: boolean; error?: string }>
   logout: () => Promise<void>
   isAdmin: boolean
 }
@@ -93,8 +94,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      // In a real app, you would hash passwords and use proper auth
-      // This is simplified for demo purposes
       const { data, error } = await supabase
         .from("users")
         .select("*")
@@ -128,7 +127,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const signInWithGoogle = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      })
+
+      if (error) {
+        console.error("Google sign-in error:", error)
+        return { success: false, error: error.message }
+      }
+
+      return { success: true }
+    } catch (error) {
+      console.error("Google sign-in error:", error)
+      return { success: false, error: "An unexpected error occurred" }
+    }
+  }
+
   const logout = async () => {
+    try {
+      await supabase.auth.signOut()
+    } catch (error) {
+      console.error("Logout error:", error)
+    }
+    
     setUser(null)
     localStorage.removeItem("user")
     router.push("/login")
@@ -140,6 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         loading,
         login,
+        signInWithGoogle,
         logout,
         isAdmin: user?.user_role === "admin",
       }}

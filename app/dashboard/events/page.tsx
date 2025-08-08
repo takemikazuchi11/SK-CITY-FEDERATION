@@ -22,15 +22,15 @@ const localizer = momentLocalizer(moment)
 interface Event {
   id: string
   title: string
-  description: string
-  image: string
-  date: string
-  time: string
-  location: string
-  organizer: string
+  description: string | null
+  image: string | null
+  date: string | null
+  time: string | null
+  location: string | null
+  organizer: string | null
   start: Date // For calendar
   end: Date // For calendar
-  category?: string // Added for category
+  category?: string | null // Added for category
 }
 
 // Category color mapping
@@ -71,11 +71,13 @@ export default function EventsPage() {
 
     // Transform the data for the calendar
     const formattedEvents = data.map((event) => {
-      const eventDate = new Date(event.date)
-      const [hours, minutes] = event.time.split(":").map(Number)
+      const eventDate = new Date(event.date || '')
+      const timeParts = (event.time || '00:00').split(":").map(Number)
+      const hours = timeParts[0] || 0
+      const minutes = timeParts[1] || 0
 
       const startDate = new Date(eventDate)
-      startDate.setHours(hours || 0, minutes || 0)
+      startDate.setHours(hours, minutes, 0, 0)
 
       const endDate = new Date(startDate)
       endDate.setHours(startDate.getHours() + 2) // Default 2 hour duration
@@ -141,7 +143,7 @@ export default function EventsPage() {
           <div className="p-2 max-w-xs">
             <h3 className="font-bold">{event.title}</h3>
             <p className="text-xs mt-1">
-              {new Date(event.date).toLocaleDateString()} at {event.time}
+              {new Date(event.date || '').toLocaleDateString()} at {event.time || ''}
             </p>
             <p className="text-xs">{event.location}</p>
           </div>
