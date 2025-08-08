@@ -140,6 +140,21 @@ export async function createAnnouncement(announcement: Omit<Announcement, "id" |
   return data[0]
 }
 
+export async function updateAnnouncement(id: string, updates: {
+  title?: string
+  content?: string
+  category?: string
+}) {
+  const { data, error } = await supabase
+    .from("announcements")
+    .update(updates)
+    .eq("id", id)
+    .select()
+
+  if (error) throw error
+  return data[0]
+}
+
 export async function likeAnnouncement(id: string) {
   const { data, error } = await supabase.rpc("increment_announcement_likes", { announcement_id: id })
 
