@@ -130,27 +130,7 @@ export default function EventsPage() {
     setDate(newDate)
   }
 
-  // Custom event component with tooltip
-  const EventComponent = ({ event }: { event: Event }) => (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div className="h-full w-full p-1 overflow-hidden cursor-pointer" onClick={() => handleEventClick(event)}>
-            <div className="text-xs font-semibold truncate">{event.title}</div>
-          </div>
-        </TooltipTrigger>
-        <TooltipContent side="right">
-          <div className="p-2 max-w-xs">
-            <h3 className="font-bold">{event.title}</h3>
-            <p className="text-xs mt-1">
-              {new Date(event.date || '').toLocaleDateString()} at {event.time || ''}
-            </p>
-            <p className="text-xs">{event.location}</p>
-          </div>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  )
+
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -256,20 +236,20 @@ export default function EventsPage() {
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className={`h-full w-full p-1 overflow-hidden cursor-pointer rounded ${bg}`} style={{border: 'none', boxShadow: 'none'}} onClick={() => handleEventClick(props.event)}>
-                        <div className="text-xs font-semibold truncate">{props.event.title}</div>
-                        {props.event.category && (
-                          <div className={`text-[10px] font-medium mt-0.5 truncate px-2 py-0.5 rounded-full text-white shadow ${CATEGORY_COLORS[props.event.category] || 'bg-gray-400'}`}>{props.event.category}</div>
-                        )}
-                      </div>
+                                             <div className={`h-full w-full p-1 overflow-hidden cursor-pointer rounded ${bg}`} style={{border: 'none', boxShadow: 'none'}} onClick={() => handleEventClick(props.event)} title="">
+                         <div className="text-xs font-semibold truncate">{props.event.title}</div>
+                         {props.event.category && (
+                           <div className={`text-[10px] font-medium mt-0.5 truncate px-2 py-0.5 rounded-full text-white shadow ${CATEGORY_COLORS[props.event.category] || 'bg-gray-400'}`}>{props.event.category}</div>
+                         )}
+                       </div>
                     </TooltipTrigger>
-                    <TooltipContent side="right">
-                      <div className="p-2 max-w-xs">
-                        <h3 className="font-bold">{props.event.title}</h3>
+                    <TooltipContent side="right" className="max-w-none">
+                      <div className="p-2 whitespace-normal">
+                        <h3 className="font-bold break-words">{props.event.title}</h3>
                         <p className="text-xs mt-1">
                           {new Date(props.event.date).toLocaleDateString()} at {props.event.time}
                         </p>
-                        <p className="text-xs">{props.event.location}</p>
+                        <p className="text-xs break-words">{props.event.location}</p>
                         {props.event.category && (
                           <p className={`text-xs mt-1 font-semibold inline-block px-2 py-0.5 rounded-full text-white shadow ${CATEGORY_COLORS[props.event.category] || 'bg-gray-400'}`}>{props.event.category}</p>
                         )}

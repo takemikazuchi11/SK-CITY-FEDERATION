@@ -244,6 +244,8 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                 </AlertDialog>
               </AdminOnly>
             </div>
+
+            
           </div>
         </div>
       </div>

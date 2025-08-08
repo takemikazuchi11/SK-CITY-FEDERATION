@@ -115,6 +115,9 @@ function AuthCallbackContent() {
             }
 
             localStorage.setItem("user", JSON.stringify(userProfile))
+            
+            // Trigger a custom event to notify auth context
+            window.dispatchEvent(new CustomEvent("userLogin", { detail: userProfile }))
           } else {
             // User exists, store their data
             const userProfile = {
@@ -130,10 +133,15 @@ function AuthCallbackContent() {
             }
 
             localStorage.setItem("user", JSON.stringify(userProfile))
+            
+            // Trigger a custom event to notify auth context
+            window.dispatchEvent(new CustomEvent("userLogin", { detail: userProfile }))
           }
 
-          // Redirect to dashboard
-          router.push("/dashboard")
+          // Small delay to ensure auth context is updated
+          setTimeout(() => {
+            router.push("/dashboard")
+          }, 200)
         } else if (!data.session?.user.email) {
           setError("No email found in session. Please try signing in again.")
           setLoading(false)

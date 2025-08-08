@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuth } from "@/lib/auth-context"
 import { supabase } from "@/lib/supabase"
+import { use } from "react"
 
-export default function EventFeedbackPage({ params }: { params: { id: string } }) {
+export default function EventFeedbackPage({ params }: { params: Promise<{ id: string }> }) {
   const { user } = useAuth()
   const router = useRouter()
   const [event, setEvent] = useState<any>(null)
@@ -18,18 +20,20 @@ export default function EventFeedbackPage({ params }: { params: { id: string } }
   const [alreadySubmitted, setAlreadySubmitted] = useState(false)
   const [loading, setLoading] = useState(true)
 
+  const resolvedParams = use(params)
+  
   useEffect(() => {
     async function fetchEventAndFeedback() {
       setLoading(true)
       // Fetch event details
-      const { data: eventData } = await supabase.from("events").select("*").eq("id", params.id).single()
+      const { data: eventData } = await supabase.from("events").select("*").eq("id", resolvedParams.id).single()
       setEvent(eventData)
       // Check if user already submitted feedback
       if (user?.id) {
         const { data: feedbackData } = await supabase
           .from("event_feedback")
           .select("id")
-          .eq("event_id", params.id)
+          .eq("event_id", resolvedParams.id)
           .eq("user_id", user.id)
           .single()
         if (feedbackData) setAlreadySubmitted(true)
@@ -37,7 +41,7 @@ export default function EventFeedbackPage({ params }: { params: { id: string } }
       setLoading(false)
     }
     fetchEventAndFeedback()
-  }, [params.id, user?.id])
+  }, [resolvedParams.id, user?.id])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -110,6 +114,30 @@ export default function EventFeedbackPage({ params }: { params: { id: string } }
         </div>
         <Button type="submit" className="w-full bg-blue-600 text-white hover:bg-blue-700" disabled={rating === 0}>Submit Feedback</Button>
       </form>
+      
+
+      {/* Feedback Section */}
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Event Feedback</h3>
+                <p className="text-gray-600 mb-4">
+                  We value your feedback! Help us improve our events by sharing your thoughts.
+                </p>
+                <Link
+                  href={`/dashboard/events/${resolvedParams.id}/feedback`}
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200"
+                >
+                  <span>Send Feedback</span>
+                  <svg className="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </Link>
+                <p className="text-xs text-gray-500 mt-2">
+                  Share your thoughts about this event
+                </p>
+              </div>
+            </div>
     </div>
+    
   )
 } 

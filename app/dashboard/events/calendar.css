@@ -70,3 +70,22 @@
   min-height: 580px;
 }
 
+/* Custom tooltip styling for better text handling */
+[data-radix-tooltip-content] {
+  max-width: none !important;
+  width: auto !important;
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+/* Ensure tooltip content can expand */
+[data-radix-tooltip-content] > div {
+  max-width: none !important;
+  width: auto !important;
+  min-width: 200px;
+  max-width: 400px;
+}
+
+
+

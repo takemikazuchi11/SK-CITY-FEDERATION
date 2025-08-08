@@ -23,6 +23,8 @@ import banner1 from "@/public/1.jpg"
 import banner2 from "@/public/2banner.jpg"
 import banner3 from "@/public/3.jpg"
 import cydc from "@/public/cydc.jpg"
+import home2 from "@/public/home2.jpg"
+import home3 from "@/public/home3.jpg"
 
 // Carousel images
 const carouselImages = [
@@ -93,7 +95,7 @@ const programItems = [
     title: "City Youth Development Council (CYDC)",
     description:
       "The CYDC is a multi-sectoral advisory body that supports youth participation in local governance, ensuring programs align with development plans.",
-    image: cydc,
+    image: home3,
     bgColor: "from-blue-900 to-blue-700",
     link: "/dashboard/programs/cydc",
   },
@@ -101,8 +103,8 @@ const programItems = [
     title: "Katipunan Kabataan (KK)",
     description:
       "Katipunan ng Kabataan is the general assembly of youth in each barangay, composed of all citizens aged 15-30 residing in the barangay for at least 6 months.",
-    image: cydc,
-    bgColor: "from-blue-800 to-blue-600",
+    image: home2,
+    bgColor: "from-blue-900 to-blue-700",
     link: "/dashboard/programs/kk",
   },
   {
@@ -111,7 +113,7 @@ const programItems = [
       "The Sangguniang Kabataan is the governing body elected by the Katipunan Kabataan that plans and executes programs for youth development in the barangay.",
     image: cydc,
     bgColor: "from-blue-900 to-blue-700",
-    link: "/dashboard/programs/sk",
+    link: "/dashboard/about/history",
   },
 ]
 

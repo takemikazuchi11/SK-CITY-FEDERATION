@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { Settings, LayoutDashboard, Bell, Calendar, HelpCircle, LogOut, FileText } from "lucide-react"
+import { Settings, LayoutDashboard, Bell, Calendar, HelpCircle, LogOut, FileText, CreditCard } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/auth-context"
@@ -67,6 +67,11 @@ export function ProfileSidebar({ isOpen, onClose }: ProfileSidebarProps) {
 
   // Common menu items for all users
   const commonMenuItems = [
+    {
+      name: "KK ID Card",
+      icon: CreditCard,
+      href: "/dashboard/kk-id-card",
+    },
     {
       name: "Account Settings",
       icon: Settings,

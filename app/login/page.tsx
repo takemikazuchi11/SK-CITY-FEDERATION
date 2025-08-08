@@ -110,36 +110,14 @@ export default function AuthPage() {
     e.preventDefault()
 
     try {
-      const { data, error } = await supabase
-        .from("users")
-        .select("*")
-        .eq("email", email)
-        .eq("password", password)
-        .single()
-
-      if (error || !data) {
-        toast.error("Invalid email or password")
-        return
-      }
-
-      // Login successful
-      const userData = {
-        id: data.id,
-        email: data.email,
-        user_role: data.user_role,
-        first_name: data.first_name,
-        last_name: data.last_name,
-        barangay: data.barangay,
-        phone: data.phone,
-        photo_url: data.photo_url,
-        created_at: data.created_at,
-      }
-
-      // Store user data
-      localStorage.setItem("user", JSON.stringify(userData))
+      const result = await login(email, password)
       
-      toast.success("Login successful")
-      router.push("/dashboard")
+      if (result.success) {
+        toast.success("Login successful")
+        router.push("/dashboard")
+      } else {
+        toast.error(result.error || "Login failed")
+      }
     } catch (error) {
       console.error("Error during login:", error)
       toast.error("An error occurred during login")

@@ -20,10 +20,13 @@ type Announcement = {
   title: string
   content: string
   created_at: string
-  created_by: string
+  author: string
+  author_role: string
+  category: string
+  likes: number
+  user_id: string
   image_url?: string
   audience?: string
-  category?: string; // Added for poll announcements
 }
 
 export default function AnnouncementsPage() {
@@ -48,15 +51,13 @@ export default function AnnouncementsPage() {
 
         if (error) throw error
 
-        // Filter by audience for regular users
+        // Ensure proper data mapping with null safety
         let filtered = (data || []).map(a => ({
           ...a,
-          created_by: a.created_by ?? '',
-          audience: a.audience ?? 'everyone',
+          created_at: a.created_at ?? '',
+          likes: a.likes ?? 0,
+          user_id: a.user_id ?? '',
         }));
-        if (user && user.user_role !== 'admin' && user.user_role !== 'moderator') {
-          filtered = filtered.filter(a => !a.audience || a.audience === 'everyone');
-        }
         setAnnouncements(filtered)
         setFilteredAnnouncements(filtered)
       } catch (error) {
@@ -192,9 +193,11 @@ export default function AnnouncementsPage() {
                     <p className="line-clamp-3 text-gray-600">{announcement.content}</p>
                   </CardContent>
                   <CardFooter>
-                    <Button variant="outline" className="w-full bg-blue-600 text-white hover:bg-blue-700">
-                      Read More
-                    </Button>
+                    <Link href={`/dashboard/announcement/${announcement.id}`} className="w-full">
+                      <Button variant="outline" className="w-full bg-blue-600 text-white hover:bg-blue-700">
+                        Read More
+                      </Button>
+                    </Link>
                   </CardFooter>
                   {/* Admin controls */}
                   {user && (user.user_role === "admin" || user.user_role === "moderator") && (

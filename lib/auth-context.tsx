@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
 
-  // Check for existing session on mount
+  // Check for existing session on mount and when localStorage changes
   useEffect(() => {
     const checkSession = async () => {
       const storedUser = localStorage.getItem("user")
@@ -48,13 +48,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch (error) {
           console.error("Failed to parse stored user:", error)
           localStorage.removeItem("user")
+          setUser(null)
         }
+      } else {
+        setUser(null)
       }
 
       setLoading(false)
     }
 
     checkSession()
+
+    // Listen for storage changes (when user logs in/out in another tab)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "user") {
+        if (e.newValue) {
+          try {
+            const parsedUser = JSON.parse(e.newValue)
+            setUser(parsedUser)
+          } catch (error) {
+            console.error("Failed to parse stored user:", error)
+            setUser(null)
+          }
+        } else {
+          setUser(null)
+        }
+      }
+    }
+
+    window.addEventListener("storage", handleStorageChange)
+    
+    // Listen for custom login events
+    const handleUserLogin = (e: CustomEvent) => {
+      setUser(e.detail)
+    }
+    
+    window.addEventListener("userLogin", handleUserLogin as EventListener)
+    
+    return () => {
+      window.removeEventListener("storage", handleStorageChange)
+      window.removeEventListener("userLogin", handleUserLogin as EventListener)
+    }
   }, [])
 
   // Redirect based on auth status and role
@@ -117,8 +151,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         created_at: data.created_at,
       }
 
+      // Update state and localStorage
       setUser(userData)
       localStorage.setItem("user", JSON.stringify(userData))
+
+      // Force a small delay to ensure state is updated before redirect
+      await new Promise(resolve => setTimeout(resolve, 100))
 
       return { success: true }
     } catch (error) {

@@ -52,11 +52,21 @@ export default function AccountPage() {
         return
       }
 
+      // Check if email has changed
+      const emailChanged = email !== user.email
+
+      // If email changed, show a simple success message
+      if (emailChanged) {
+        toast.success("Email address updated successfully.")
+      }
+
+      // Update user profile in database
       const { data, error } = await supabase
         .from("users")
         .update({
           first_name: firstName,
           last_name: lastName,
+          email: email,
           phone: phone,
           barangay: barangay,
           photo_url: photoUrl,
@@ -73,11 +83,13 @@ export default function AccountPage() {
         ...user,
         first_name: firstName,
         last_name: lastName,
+        email: email,
         phone: phone,
         barangay: barangay,
         photo_url: photoUrl,
       }
       localStorage.setItem("user", JSON.stringify(updatedUser))
+      
       // Force reload user from localStorage to update context
       window.location.reload()
 
@@ -147,11 +159,12 @@ export default function AccountPage() {
                       id="email" 
                       type="email" 
                       value={email} 
-                      disabled 
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
                     />
-                    <p className="text-sm text-muted-foreground">
-                      Your email cannot be changed
-                    </p>
+                                         <p className="text-sm text-muted-foreground">
+                       You can change your email address. The change will be applied immediately.
+                     </p>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone number</Label>

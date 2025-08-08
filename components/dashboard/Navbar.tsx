@@ -94,6 +94,7 @@ export default function DashboardNavbar() {
       href: "#",
       children: [
         { title: "Vision, Mission, and Core Values", href: "/dashboard/about" },
+        { title: "Overview of SKCF", href: "/dashboard/about/skcf" },
         { title: "SK History", href: "/dashboard/about/history" },
         { title: "SK Federation Officers", href: "/dashboard/about/officers" },
         { title: "Barangay SK Officials", href: "/dashboard/about/barangays" },
