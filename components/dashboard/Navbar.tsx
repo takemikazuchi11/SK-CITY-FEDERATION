@@ -23,6 +23,7 @@ const commonNavItems = [
       { title: "SK History", href: "/dashboard/about/history" },
       { title: "SK Federation Officers", href: "/dashboard/about/officers" },
       { title: "Barangay SK Officials", href: "/dashboard/about/barangays" },
+      { title: "About Website", href: "/dashboard/about/website" },
     ],
   },
   {
@@ -98,6 +99,7 @@ export default function DashboardNavbar() {
         { title: "SK History", href: "/dashboard/about/history" },
         { title: "SK Federation Officers", href: "/dashboard/about/officers" },
         { title: "Barangay SK Officials", href: "/dashboard/about/barangays" },
+        { title: "About Website", href: "/dashboard/about/website" },
       ],
     },
     {

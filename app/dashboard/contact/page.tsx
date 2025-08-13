@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/alert-dialog"
 
 const categoryColors = {
-  "National Agency": "bg-blue-100 text-blue-800",
+  "Departments and National Agency": "bg-blue-100 text-blue-800",
   "Constitutional Body": "bg-purple-100 text-purple-800",
   "Government Bank": "bg-green-100 text-green-800",
   "Local Government": "bg-orange-100 text-orange-800",

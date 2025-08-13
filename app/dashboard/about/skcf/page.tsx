@@ -110,24 +110,33 @@ export default function SKCFOverviewPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-red-50">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-red-600 text-white">
-        <div className="container mx-auto px-4 py-8">
-   
-          <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Overview of SKCF
-            </h1>
-            <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              Sangguniang Kabataan Calapan City Federation
-            </p>
-            <p className="text-lg text-blue-100 mt-2">
-              Empowering Youth Leadership Across 62 Barangays
-            </p>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-blue-50">
+             {/* Header */}
+       <div className="relative h-[300px] md:h-[400px]">
+         <div 
+           className="w-full h-full"
+           style={{
+             backgroundImage: `url('/banner-about.webp')`,
+             backgroundSize: 'cover',
+             backgroundPosition: 'center',
+             backgroundRepeat: 'no-repeat'
+           }}
+         />
+         <div className="absolute inset-0 bg-blue-900/80"></div>
+         <div className="absolute inset-0 flex items-center justify-center">
+           <div className="text-center text-white">
+             <h1 className="text-4xl md:text-5xl font-bold mb-4">
+               Overview of SKCF
+             </h1>
+             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
+               Sangguniang Kabataan Calapan City Federation
+             </p>
+             <p className="text-lg text-blue-100 mt-2">
+               Empowering Youth Leadership Across 62 Barangays
+             </p>
+           </div>
+         </div>
+       </div>
 
       {/* Navigation Tabs */}
       <div className="container mx-auto px-4 py-6">
@@ -151,28 +160,27 @@ export default function SKCFOverviewPage() {
         <div className="max-w-6xl mx-auto">
           {activeTab === "overview" && (
             <div className="space-y-8">
-                             {/* Hero Section */}
-               <Card className="overflow-hidden">
-                 <div className="relative h-64">
-                   <Image
-                     src={cydc}
-                     alt="SKCF Central Governing Body"
-                     fill
-                     className="object-cover"
-                   />
-                   <div className="absolute inset-0 bg-gradient-to-r from-blue-600/80 to-red-600/80"></div>
-                   <div className="absolute inset-0 bg-black bg-opacity-30"></div>
-                   <div className="relative h-full flex items-center justify-center">
-                     <div className="text-center text-white">
-                       <h2 className="text-3xl font-bold mb-4">Central Governing Body</h2>
-                       <p className="text-xl max-w-2xl mx-auto">
-                         Representing the youth from all 62 barangays of Calapan City
-                       </p>
-                     </div>
-                   </div>
-                 </div>
-                <CardContent className="p-8">
-                  <div className="grid md:grid-cols-2 gap-8">
+                                                                                         {/* Hero Section */}
+                <Card className="overflow-hidden">
+                  <div className="relative h-64">
+                    <Image
+                      src={cydc}
+                      alt="SKCF Central Governing Body"
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-blue-900/80"></div>
+                    <div className="relative h-full flex items-center justify-center">
+                      <div className="text-center text-white">
+                        <h2 className="text-3xl font-bold mb-4">Sangguniang Kabataan of Calapan City</h2>
+                        <p className="text-xl max-w-2xl mx-auto">
+                          Representing the youth from all 62 barangays of Calapan City
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <CardContent className="p-8">
+                    <div className="grid md:grid-cols-2 gap-8">
                     <div>
                       <h3 className="text-2xl font-bold text-gray-800 mb-4">Our Mission</h3>
                       <p className="text-gray-600 leading-relaxed">

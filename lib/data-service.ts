@@ -176,7 +176,7 @@ export async function searchBarangays(query: string) {
 export async function getBarangayById(id: number) {
   const { data, error } = await supabase
     .from("barangays")
-    .select("id, name, phone, page, email, logo_url")
+    .select("id, name, phone, page, email, logo_url, cover_photo_url")
     .eq("id", id)
     .single()
 
@@ -268,7 +268,7 @@ export async function updateSKOfficial(
 export async function getBarangayHistory(barangayId: number) {
   const { data, error } = await supabase
     .from("barangays")
-    .select("id, name, logo_url, history, phone, page, email")
+    .select("id, name, logo_url, history, phone, page, email, cover_photo_url")
     .eq("id", barangayId)
     .single()
 
@@ -321,6 +321,7 @@ export async function updateBarangay(
     phone?: string | null
     page?: string | null
     email?: string | null
+    cover_photo_url?: string | null
   },
 ) {
   const { data, error } = await supabase.from("barangays").update(updates).eq("id", id).select()

@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { ArrowLeft, Calendar, User, Edit, Trash2, Facebook, Twitter, Instagram, MessageCircle, Link2 } from "lucide-react"
 import { getNewsBySlug, updateNews, deleteNews, type NewsArticle } from "@/lib/news-service"
+import { extractYouTubeId, getYouTubeThumbnailUrl } from "@/lib/youtube-utils"
 import { useAuth } from "@/lib/auth-context"
 import { AdminOnly } from "@/components/role-based-ui"
 import { toast } from "sonner"
@@ -51,7 +52,9 @@ export default function NewsArticlePage({ params }: NewsArticlePageProps) {
     excerpt: "",
     category: "",
     author: "",
+    media_type: "image" as "image" | "video",
     featured_image_url: "",
+    youtube_video_id: "",
   })
 
   useEffect(() => {
@@ -69,7 +72,9 @@ export default function NewsArticlePage({ params }: NewsArticlePageProps) {
           excerpt: articleData.excerpt || "",
           category: articleData.category,
           author: articleData.author,
+          media_type: articleData.media_type || "image",
           featured_image_url: articleData.featured_image_url || "",
+          youtube_video_id: articleData.youtube_video_id || "",
         })
       } catch (error) {
         console.error("Error fetching article:", error)
@@ -86,8 +91,16 @@ export default function NewsArticlePage({ params }: NewsArticlePageProps) {
     if (!article) return
 
     try {
+      // Process media fields based on media type
+      const mediaData = {
+        media_type: formData.media_type,
+        featured_image_url: formData.media_type === "image" ? formData.featured_image_url : undefined,
+        youtube_video_id: formData.media_type === "video" ? extractYouTubeId(formData.youtube_video_id) : undefined,
+      }
+
       await updateNews(article.id, {
         ...formData,
+        ...mediaData,
         status: "published", // Always published
       })
       toast.success("News article updated successfully!")
@@ -123,6 +136,8 @@ export default function NewsArticlePage({ params }: NewsArticlePageProps) {
       day: "numeric",
     })
   }
+
+
 
   // Social share URLs
   const pathname = typeof window !== 'undefined' ? window.location.href : '';
@@ -185,14 +200,26 @@ export default function NewsArticlePage({ params }: NewsArticlePageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-3">
-            {/* Featured Image */}
-            {article.featured_image_url && (
+            {/* Featured Media */}
+            {(article.featured_image_url || article.youtube_video_id) && (
               <div className="mb-8">
-                <img
-                  src={article.featured_image_url || "/placeholder.svg"}
-                  alt={article.title}
-                  className="w-full h-auto rounded-lg shadow-md"
-                />
+                {article.media_type === "video" && article.youtube_video_id ? (
+                  <div className="w-full aspect-video rounded-lg shadow-md overflow-hidden">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${article.youtube_video_id}`}
+                      title={article.title}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                ) : (
+                  <img
+                    src={article.featured_image_url || "/placeholder.svg"}
+                    alt={article.title}
+                    className="w-full h-auto rounded-lg shadow-md"
+                  />
+                )}
               </div>
             )}
 
@@ -381,14 +408,62 @@ export default function NewsArticlePage({ params }: NewsArticlePageProps) {
               />
             </div>
 
-            <div>
-              <Label htmlFor="edit-featured_image_url">Featured Image URL</Label>
-              <Input
-                id="edit-featured_image_url"
-                value={formData.featured_image_url}
-                onChange={(e) => setFormData({ ...formData, featured_image_url: e.target.value })}
-                placeholder="https://example.com/image.jpg"
-              />
+            <div className="space-y-4">
+              <div>
+                <Label>Media Type</Label>
+                <div className="flex space-x-4 mt-2">
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="edit-media_type"
+                      value="image"
+                      checked={formData.media_type === "image"}
+                      onChange={(e) => setFormData({ ...formData, media_type: e.target.value as "image" | "video" })}
+                      className="text-blue-600"
+                    />
+                    <span>Featured Image</span>
+                  </label>
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="edit-media_type"
+                      value="video"
+                      checked={formData.media_type === "video"}
+                      onChange={(e) => setFormData({ ...formData, media_type: e.target.value as "image" | "video" })}
+                      className="text-blue-600"
+                    />
+                    <span>YouTube Video</span>
+                  </label>
+                </div>
+              </div>
+
+              {formData.media_type === "image" ? (
+                <div>
+                  <Label htmlFor="edit-featured_image_url">Featured Image URL</Label>
+                  <Input
+                    id="edit-featured_image_url"
+                    value={formData.featured_image_url}
+                    onChange={(e) => setFormData({ ...formData, featured_image_url: e.target.value })}
+                    placeholder="https://example.com/image.jpg"
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Enter the URL of the image you want to display
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <Label htmlFor="edit-youtube_video_id">YouTube Video</Label>
+                  <Input
+                    id="edit-youtube_video_id"
+                    value={formData.youtube_video_id}
+                    onChange={(e) => setFormData({ ...formData, youtube_video_id: e.target.value })}
+                    placeholder="Enter YouTube video ID or full URL"
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Enter YouTube video ID (e.g., "dQw4w9WgXcQ") or full URL. The video will be embedded and playable on the news page.
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end space-x-2 pt-4">

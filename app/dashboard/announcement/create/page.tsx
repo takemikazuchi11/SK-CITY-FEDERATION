@@ -33,6 +33,7 @@ export default function CreateAnnouncement() {
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
   const [category, setCategory] = useState("general")
+  const [displayDuration, setDisplayDuration] = useState<number | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [sendNotification, setSendNotification] = useState(true)
   const [notificationMode, setNotificationMode] = useState<"all" | "selected">("all")
@@ -55,6 +56,7 @@ export default function CreateAnnouncement() {
         setTitle(data.title || "");
         setContent(data.content || "");
         setCategory(data.category || "general");
+        setDisplayDuration(data.display_duration);
       })();
     }
   }, [editId]);
@@ -107,7 +109,7 @@ export default function CreateAnnouncement() {
       let announcementResult;
       if (editId) {
         // Update existing
-        announcementResult = await updateAnnouncement(editId, { title, content, category });
+        announcementResult = await updateAnnouncement(editId, { title, content, category, display_duration: displayDuration || undefined });
         toast({
           title: "Announcement updated",
           description: "Your announcement has been updated successfully",
@@ -123,6 +125,7 @@ export default function CreateAnnouncement() {
           author_role: user.user_role,
           category,
           user_id: user.id,
+          display_duration: displayDuration || undefined,
         });
         toast({
           title: "Announcement created",
@@ -142,7 +145,16 @@ export default function CreateAnnouncement() {
       // Determine which emails to send to based on the notification mode
       const emailsToSend = notificationMode === "selected" ? selectedUsers : undefined
 
-      const result = await sendEmailNotification(announcementResult, emailsToSend)
+      // Transform the announcement result to match the expected type
+      const transformedAnnouncement = {
+        ...announcementResult,
+        created_at: announcementResult.created_at || "",
+        likes: announcementResult.likes || 0,
+        user_id: announcementResult.user_id || "",
+        display_duration: announcementResult.display_duration || 30
+      };
+      
+      const result = await sendEmailNotification(transformedAnnouncement, emailsToSend)
 
       setNotificationStatus({
         status: result.success ? "success" : "error",
@@ -216,6 +228,23 @@ export default function CreateAnnouncement() {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="display-duration">Display Duration (days) - Optional</Label>
+                <Input
+                  id="display-duration"
+                  type="number"
+                  min="1"
+                  max="365"
+                  placeholder="30"
+                  value={displayDuration || ""}
+                  onChange={(e) => setDisplayDuration(e.target.value ? parseInt(e.target.value) : null)}
+                  className="w-full"
+                />
+                <p className="text-sm text-muted-foreground">
+                  Optional: How long this announcement will be displayed on the homepage. Leave empty to display indefinitely.
+                </p>
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="content">Content *</Label>
                 <Textarea
                   id="content"
@@ -244,6 +273,22 @@ export default function CreateAnnouncement() {
                     </Button>
                   </CollapsibleTrigger>
                 </div>
+                
+                {sendNotification && (
+                  <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-md">
+                    <div className="flex items-start space-x-2">
+                      <div className="text-amber-600 mt-0.5">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="text-sm text-amber-800">
+                        <p className="font-medium">Email Limit Notice</p>
+                        <p>We can only send up to 100 emails per day. Please select specific users instead of sending to all users to avoid hitting this limit.</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <CollapsibleContent className="mt-4">
                   {sendNotification && (
@@ -258,8 +303,23 @@ export default function CreateAnnouncement() {
                       </TabsList>
 
                       <TabsContent value="all">
-                        <div className="text-sm text-muted-foreground">
-                          Email notification will be sent to all registered users.
+                        <div className="space-y-3">
+                          <div className="text-sm text-muted-foreground">
+                            Email notification will be sent to all registered users.
+                          </div>
+                          <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                            <div className="flex items-start space-x-2">
+                              <div className="text-red-600 mt-0.5">
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                              <div className="text-sm text-red-800">
+                                <p className="font-medium">⚠️ Daily Limit Warning</p>
+                                <p>Sending to all users may exceed our daily limit of 100 emails. Consider using "Select Users" instead to target specific recipients.</p>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </TabsContent>
 

@@ -26,6 +26,7 @@ export type Announcement = {
   likes: number
   user_id: string
   author_photo_url?: string // Add this field
+                display_duration?: number | null // Optional: if null/undefined, displays indefinitely
 }
 
 export type Comment = {
@@ -115,6 +116,32 @@ export async function getAnnouncements(): Promise<Announcement[]> {
   }))
 }
 
+export async function getActiveAnnouncements(): Promise<Announcement[]> {
+  const { data, error } = await supabase.from("announcements").select("*").order("created_at", { ascending: false })
+
+  if (error) throw error
+  
+  const now = new Date()
+  
+                // Filter announcements that are still within their display duration
+              const activeAnnouncements = (data ?? []).filter((a) => {
+                if (a.display_duration === null || a.display_duration === undefined) return true // If no duration set, always show
+                
+                const createdDate = new Date(a.created_at || "")
+                const daysSinceCreation = Math.floor((now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24))
+                
+                return daysSinceCreation <= a.display_duration
+              })
+
+  // Map nulls to defaults for type safety
+  return activeAnnouncements.map((a) => ({
+    ...a,
+    created_at: a.created_at ?? "",
+    likes: a.likes ?? 0,
+    user_id: a.user_id ?? ""
+  }))
+}
+
 export async function getAnnouncementById(id: string) {
   const { data, error } = await supabase
     .from("announcements")
@@ -144,6 +171,7 @@ export async function updateAnnouncement(id: string, updates: {
   title?: string
   content?: string
   category?: string
+  display_duration?: number
 }) {
   const { data, error } = await supabase
     .from("announcements")

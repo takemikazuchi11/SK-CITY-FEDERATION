@@ -22,6 +22,7 @@ interface Barangay {
   phone?: string | null
   page?: string | null
   email?: string | null
+  cover_photo_url?: string | null
 }
 
 interface EditBarangayModalProps {
@@ -39,12 +40,14 @@ export function EditBarangayModal({ barangay, isOpen, onClose, onBarangayUpdated
     phone: string
     page: string
     email: string
+    cover_photo_url: string
   }>({
     history: barangay?.history || "",
     logo_url: barangay?.logo_url || "",
     phone: barangay?.phone || "",
     page: barangay?.page || "",
     email: barangay?.email || "",
+    cover_photo_url: barangay?.cover_photo_url || "",
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -57,6 +60,7 @@ export function EditBarangayModal({ barangay, isOpen, onClose, onBarangayUpdated
         phone: barangay.phone || "",
         page: barangay.page || "",
         email: barangay.email || "",
+        cover_photo_url: barangay.cover_photo_url || "",
       })
     }
   })
@@ -87,6 +91,7 @@ export function EditBarangayModal({ barangay, isOpen, onClose, onBarangayUpdated
         phone: formData.phone,
         page: formData.page,
         email: formData.email,
+        cover_photo_url: formData.cover_photo_url,
       })
 
       toast.success("Barangay information updated successfully")
@@ -135,6 +140,20 @@ export function EditBarangayModal({ barangay, isOpen, onClose, onBarangayUpdated
                 onChange={handleChange}
                 className="col-span-3"
                 placeholder="https://example.com/logo.png"
+              />
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="cover_photo_url" className="text-right">
+                Cover Photo URL
+              </Label>
+              <Input
+                id="cover_photo_url"
+                name="cover_photo_url"
+                value={formData.cover_photo_url}
+                onChange={handleChange}
+                className="col-span-3"
+                placeholder="https://example.com/cover-photo.jpg"
               />
             </div>
 
@@ -204,6 +223,21 @@ export function EditBarangayModal({ barangay, isOpen, onClose, onBarangayUpdated
                     className="object-cover w-full h-full"
                     onError={(e) => {
                       e.currentTarget.src = "/placeholder.svg?height=160&width=160"
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {formData.cover_photo_url && (
+              <div className="flex justify-center mt-2">
+                <div className="relative h-40 w-80 border rounded-lg overflow-hidden border-blue-600">
+                  <img
+                    src={formData.cover_photo_url || "/placeholder.svg"}
+                    alt="Barangay cover photo preview"
+                    className="object-cover w-full h-full"
+                    onError={(e) => {
+                      e.currentTarget.src = "/placeholder.svg?height=160&width=320"
                     }}
                   />
                 </div>

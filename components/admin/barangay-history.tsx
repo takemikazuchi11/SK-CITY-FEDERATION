@@ -22,6 +22,7 @@ interface BarangayHistoryData {
   phone: string | null
   page: string | null
   email: string | null
+  cover_photo_url: string | null
 }
 
 export function BarangayHistory({ barangayId, barangayName }: BarangayHistoryProps) {
@@ -86,7 +87,8 @@ export function BarangayHistory({ barangayId, barangayName }: BarangayHistoryPro
             logo_url: "",
             phone: "",
             page: "",
-            email: ""
+            email: "",
+            cover_photo_url: ""
           }}
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
@@ -100,9 +102,19 @@ export function BarangayHistory({ barangayId, barangayName }: BarangayHistoryPro
   const canEdit = canEditBarangay(user, historyData.name)
 
   return (
-    <div className="mb-8 overflow-hidden rounded-lg bg-gradient-to-b from-blue-900 to-purple-900 w-full">
+    <div className="mb-8 overflow-hidden rounded-lg w-full">
       {/* Logo and Title Section */}
-      <div className="relative py-16 px-4 text-center text-white w-full rounded-t-3xl">
+      <div 
+        className="relative py-16 px-4 text-center text-white w-full rounded-t-3xl"
+        style={{
+          backgroundImage: historyData.cover_photo_url 
+            ? `linear-gradient(rgba(30, 58, 138, 0.8), rgba(88, 28, 135, 0.8)), url(${historyData.cover_photo_url})`
+            : 'linear-gradient(to bottom, rgb(30, 58, 138), rgb(88, 28, 135))',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
         {canEdit && (
           <div className="absolute top-4 right-4">
             <Button

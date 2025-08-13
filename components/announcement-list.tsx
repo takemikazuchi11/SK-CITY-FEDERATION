@@ -7,7 +7,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Pencil, Trash2, PlusCircle } from "lucide-react"
-import { getAnnouncements, deleteAnnouncement, type Announcement } from "@/lib/supabase"
+import { getActiveAnnouncements, deleteAnnouncement, type Announcement } from "@/lib/supabase"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAuth } from "../lib/auth-context"
 import { format } from "date-fns"
@@ -68,7 +68,7 @@ export default function AnnouncementList() {
     async function fetchAnnouncements() {
       try {
         setLocalLoading(true)
-        const data = await getAnnouncements()
+        const data = await getActiveAnnouncements()
         // Filter by audience
         const filtered = data.filter(a => {
           if (!a.audience || a.audience === 'everyone') return true;
@@ -263,7 +263,16 @@ export default function AnnouncementList() {
       // 1. Create announcement
       const { data: announcementData, error: announcementError } = await supabase
         .from("announcements")
-        .insert([{ title: createForm.title, content: createForm.content, author: "", author_role: "", category: "", likes: 0, user_id: user?.id ?? "" }])
+        .insert([{ 
+          title: createForm.title, 
+          content: createForm.content, 
+          author: `${user?.first_name} ${user?.last_name}` || "", 
+          author_role: user?.user_role || "", 
+          category: isPoll ? "poll" : "general", 
+          likes: 0, 
+          user_id: user?.id ?? "",
+          // No default display duration - will display indefinitely
+        }])
         .select();
       if (announcementError) throw announcementError;
       const announcement = announcementData[0] as Announcement;

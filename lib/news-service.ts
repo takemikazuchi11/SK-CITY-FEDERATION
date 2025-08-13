@@ -17,7 +17,9 @@ export interface NewsArticle {
   author_id: string
   category: string
   status: "draft" | "published" | "archived"
+  media_type?: "image" | "video"
   featured_image_url?: string
+  youtube_video_id?: string
   published_at: string
   created_at: string
   updated_at: string
@@ -31,7 +33,9 @@ export interface CreateNewsData {
   author_id: string
   category: string
   status: "draft" | "published" | "archived"
+  media_type?: "image" | "video"
   featured_image_url?: string
+  youtube_video_id?: string
 }
 
 export interface UpdateNewsData {
@@ -41,7 +45,9 @@ export interface UpdateNewsData {
   author?: string
   category?: string
   status?: "draft" | "published" | "archived"
+  media_type?: "image" | "video"
   featured_image_url?: string
+  youtube_video_id?: string
 }
 
 // Generate slug from title

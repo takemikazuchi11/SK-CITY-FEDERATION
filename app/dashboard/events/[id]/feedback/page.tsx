@@ -117,26 +117,38 @@ export default function EventFeedbackPage({ params }: { params: Promise<{ id: st
       
 
       {/* Feedback Section */}
-            <div className="mt-8 pt-6 border-t border-gray-200">
-              <div className="text-center">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Event Feedback</h3>
-                <p className="text-gray-600 mb-4">
-                  We value your feedback! Help us improve our events by sharing your thoughts.
-                </p>
-                <Link
-                  href={`/dashboard/events/${resolvedParams.id}/feedback`}
-                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200"
-                >
-                  <span>Send Feedback</span>
-                  <svg className="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </Link>
-                <p className="text-xs text-gray-500 mt-2">
-                  Share your thoughts about this event
-                </p>
-              </div>
+      <div className="mt-8 pt-6 border-t border-gray-200">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">Event Feedback</h3>
+          <p className="text-gray-600 mb-4">
+            We value your feedback! Help us improve our events by sharing your thoughts.
+          </p>
+          
+          {event.feedback_url ? (
+            // If feedback URL exists, show button that redirects to Google Form
+            <a
+              href={event.feedback_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200"
+            >
+              <span>Send Feedback</span>
+              <svg className="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          ) : (
+            // If no feedback URL, show message
+            <div className="text-gray-500">
+              <p>No feedback form available for this event.</p>
             </div>
+          )}
+          
+          <p className="text-xs text-gray-500 mt-2">
+            {event.feedback_url ? "Share your thoughts about this event" : "Contact event organizers for feedback"}
+          </p>
+        </div>
+      </div>
     </div>
     
   )

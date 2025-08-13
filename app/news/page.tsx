@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calendar, User, Search, SlidersHorizontal, Tag, Users, ArrowLeft } from "lucide-react"
 import { getPublishedNews, type NewsArticle } from "@/lib/news-service"
+import { getYouTubeThumbnailUrl } from "@/lib/youtube-utils"
 import DashboardNavbar from "@/components/dashboard/Navbar"
 
 export default function AllNewsPage() {
@@ -209,13 +210,36 @@ export default function AllNewsPage() {
               >
                 <Link href={`/news/${article.slug}`}>
                   <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full cursor-pointer">
-                    {article.featured_image_url && (
+                    {(article.featured_image_url || article.youtube_video_id) && (
                       <div className="aspect-video relative">
-                        <img
-                          src={article.featured_image_url || "/placeholder.svg"}
-                          alt={article.title}
-                          className="w-full h-full object-cover"
-                        />
+                                                 {article.media_type === "video" && article.youtube_video_id ? (
+                           <div className="w-full h-full relative">
+                             <img
+                               src={getYouTubeThumbnailUrl(article.youtube_video_id, 'maxresdefault')}
+                               alt={`${article.title} video thumbnail`}
+                               className="w-full h-full object-cover"
+                               onError={(e) => {
+                                 // Fallback to medium quality if maxresdefault doesn't exist
+                                 const target = e.target as HTMLImageElement;
+                                 if (article.youtube_video_id) {
+                                   target.src = getYouTubeThumbnailUrl(article.youtube_video_id, 'hqdefault');
+                                 }
+                               }}
+                             />
+                             {/* Play button overlay */}
+                             <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+                               <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center shadow-lg">
+                                 <div className="w-0 h-0 border-l-[12px] border-l-white border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent ml-1"></div>
+                               </div>
+                             </div>
+                           </div>
+                         ) : (
+                          <img
+                            src={article.featured_image_url || "/placeholder.svg"}
+                            alt={article.title}
+                            className="w-full h-full object-cover"
+                          />
+                        )}
                       </div>
                     )}
                     <CardContent className="p-6 flex flex-col h-full">

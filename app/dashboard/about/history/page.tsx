@@ -15,16 +15,17 @@ export default function SKHistoryPage() {
       href: "https://www.officialgazette.gov.ph/2016/01/15/republic-act-no-10742/",
     },
     {
-      title: "SK Reform Act Implementing Rules and Regulations",
-      href: "#",
+      title: "Republic Act No. 11768",
+
+      href: "https://elibrary.judiciary.gov.ph/thebookshelf/showdocs/2/95044",
     },
     {
-      title: "DILG Memorandum on SK Implementation",
-      href: "#",
+      title: "Revise IRR of Republic Act No. 10742",
+      href: "https://elibrary.judiciary.gov.ph/thebookshelf/showdocs/2/97375",
     },
     {
-      title: "Youth Development Programs under RA 10742",
-      href: "#",
+      title: "Revise IRR of Republic Act No. 11768",
+      href: "https://nyc-sk.com/assets/issuances/20230721-IRR-RA-11768-FRM.pdf",
     },
   ]
 

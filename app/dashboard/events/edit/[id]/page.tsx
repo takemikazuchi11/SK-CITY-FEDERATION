@@ -14,7 +14,7 @@ import { AdminOnly } from "@/components/role-based-ui"
 import { createNotification } from "@/lib/notification-service"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 
-// Update the Event interface to include the logo field
+// Update the Event interface to include the logo and feedback_url fields
 interface Event {
   id: string
   title: string
@@ -28,6 +28,7 @@ interface Event {
   capacity: string
   logo?: string
   category?: string
+  feedback_url?: string
 }
 
 export default function EditEventPage({ params }: { params: { id: string } }) {
@@ -217,6 +218,21 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
               />
             </div>
             <p className="mt-1 text-sm text-gray-500">Upload a logo for your event (recommended size: 64x64px)</p>
+          </div>
+
+          <div>
+            <label htmlFor="feedback_url" className="block text-sm font-medium text-gray-700">
+              Feedback Form URL (Optional)
+            </label>
+            <Input
+              type="url"
+              name="feedback_url"
+              id="feedback_url"
+              value={event.feedback_url || ""}
+              onChange={handleChange}
+              placeholder="https://forms.google.com/your-form-url"
+            />
+            <p className="mt-1 text-sm text-gray-500">Enter Google Form URL for collecting event feedback. Leave empty if no feedback is needed.</p>
           </div>
           <div>
             <label htmlFor="category" className="block text-sm font-medium text-gray-700">

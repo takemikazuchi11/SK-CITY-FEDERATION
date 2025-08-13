@@ -522,7 +522,7 @@ function NotificationCard({ notification, onClick, selectMode, isSelected }: Not
       case "announcement":
         return "destructive"
       case "recommendation":
-        return "secondary"
+        return "outline"
       default:
         return "outline"
     }
@@ -544,9 +544,13 @@ function NotificationCard({ notification, onClick, selectMode, isSelected }: Not
 
   return (
     <Card
-      className={`cursor-pointer transition-colors hover:bg-gray-50 ${
+      className={`cursor-pointer transition-all duration-300 ${
         !notification.read ? "border-l-4 border-l-blue-500" : ""
-      } ${isSelected ? "bg-blue-50 border-blue-300" : ""}`}
+      } ${isSelected ? "bg-blue-50 border-blue-300" : ""} ${
+        notification.type === "recommendation" 
+          ? "border-l-4 border-l-green-500 bg-gradient-to-r from-green-50/50 to-white hover:shadow-lg hover:scale-[1.01] hover:from-green-100/70 hover:to-white" 
+          : "hover:bg-gray-50"
+      }`}
       onClick={onClick}
     >
       <CardContent className="p-4 flex gap-4">
@@ -556,29 +560,89 @@ function NotificationCard({ notification, onClick, selectMode, isSelected }: Not
           </div>
         )}
 
-        <div className="flex-shrink-0 mt-1">{getIcon()}</div>
+                 <div className="flex-shrink-0 mt-1">
+           {notification.type === "recommendation" ? (
+             <div className="relative group/icon">
+               {getIcon()}
+               {/* Add a subtle glow effect for recommendations */}
+               <div className="absolute inset-0 bg-green-200 rounded-full blur-sm opacity-30 group-hover/icon:opacity-50 transition-opacity duration-300"></div>
+               {/* Add a subtle pulse animation for recommendations */}
+               <div className="absolute inset-0 bg-green-300 rounded-full blur-sm opacity-20 animate-pulse"></div>
+             </div>
+           ) : (
+             getIcon()
+           )}
+         </div>
 
         <div className="flex-grow">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
             <div>
-              <h3 className="font-medium text-gray-900">{notification.title}</h3>
-              <p className="text-sm text-gray-600 mt-1">{notification.content}</p>
+              <h3 className={`font-medium ${notification.type === "recommendation" ? "text-green-800" : "text-gray-900"}`}>
+                {notification.title}
+              </h3>
+              <p className={`text-sm mt-1 ${
+                notification.type === "recommendation" 
+                  ? "text-green-700 leading-relaxed" 
+                  : "text-gray-600"
+              }`}>
+                {notification.content}
+              </p>
             </div>
 
             <div className="flex flex-col items-start sm:items-end gap-2">
-              <Badge variant={getBadgeVariant()} className="whitespace-nowrap">
-                {getTypeLabel()}
-              </Badge>
+              {notification.type === "recommendation" ? (
+                <Badge 
+                  variant="outline" 
+                  className="whitespace-nowrap border-green-300 text-green-700 bg-green-50 hover:bg-green-100 transition-all duration-300 hover:scale-105 hover:shadow-sm"
+                >
+                  {getTypeLabel()}
+                </Badge>
+              ) : (
+                <Badge variant={getBadgeVariant()} className="whitespace-nowrap">
+                  {getTypeLabel()}
+                </Badge>
+              )}
               <span className="text-xs text-gray-500">
                 {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
               </span>
             </div>
           </div>
 
-          {notification.image_url && (
+          {notification.type === "recommendation" && (
+            <div className="mt-3 group">
+              {notification.image_url ? (
+                // Show event image for recommendations with hover effect
+                <div className="relative overflow-hidden rounded-lg transition-all duration-300 group-hover:shadow-lg">
+                  <img
+                    src={notification.image_url}
+                    alt={notification.title}
+                    className="h-32 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                  {/* Hover overlay with event details */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center text-white">
+                      <div className="text-lg font-semibold mb-1">🎯</div>
+                      <div className="text-sm font-medium">View Event Details</div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                // Fallback visual for recommendations without images - with hover effect
+                <div className="h-32 w-full bg-gradient-to-r from-green-100 to-blue-100 rounded-lg shadow-sm flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:scale-[1.02] cursor-pointer">
+                  <div className="text-center transition-transform duration-300 group-hover:scale-110">
+                    <div className="text-4xl mb-2">🎯</div>
+                    <div className="text-sm text-green-700 font-medium">Recommended Event</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Show images for other notification types (non-recommendations) */}
+          {notification.image_url && notification.type !== "recommendation" && (
             <div className="mt-3">
               <img
-                src={notification.image_url || "/placeholder.svg"}
+                src={notification.image_url}
                 alt={notification.title}
                 className="h-24 w-full object-cover rounded-md"
               />
@@ -587,9 +651,18 @@ function NotificationCard({ notification, onClick, selectMode, isSelected }: Not
 
           {notification.action_url && (
             <div className="mt-3">
-              <Button variant="link" className="p-0 h-auto text-sm text-blue-600">
-                View details →
-              </Button>
+                             {notification.type === "recommendation" ? (
+                 <Button 
+                   variant="link" 
+                   className="p-0 h-auto text-sm text-green-600 hover:text-green-800 font-medium transition-all duration-300 hover:scale-105 hover:translate-x-1"
+                 >
+                   View details →
+                 </Button>
+               ) : (
+                <Button variant="link" className="p-0 h-auto text-sm text-blue-600">
+                  View details →
+                </Button>
+              )}
             </div>
           )}
         </div>

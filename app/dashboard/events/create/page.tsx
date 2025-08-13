@@ -28,6 +28,7 @@ export default function CreateEventPage() {
     image: "",
     capacity: "100",
     category: "",
+    feedback_url: "",
   })
 
   
@@ -196,6 +197,19 @@ export default function CreateEventPage() {
                     placeholder="Enter image URL for your event"
                   />
                   <p className="text-sm text-gray-500">Enter a URL for the event image</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="feedback_url">Feedback Form URL (Optional)</Label>
+                  <Input
+                    id="feedback_url"
+                    name="feedback_url"
+                    value={formData.feedback_url}
+                    onChange={handleChange}
+                    placeholder="https://forms.google.com/your-form-url"
+                    type="url"
+                  />
+                  <p className="text-sm text-gray-500">Enter Google Form URL for collecting event feedback. Leave empty if no feedback is needed.</p>
                 </div>
 
                 <div className="flex justify-end space-x-4">

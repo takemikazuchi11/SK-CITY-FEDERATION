@@ -34,6 +34,7 @@ interface Barangay {
   page?: string | null
   email?: string | null
   logo_url?: string | null
+  cover_photo_url?: string | null
 }
 
 interface SKOrgChartProps {
