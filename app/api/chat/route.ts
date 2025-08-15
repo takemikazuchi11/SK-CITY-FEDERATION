@@ -71,7 +71,7 @@ export async function POST(req: Request) {
       console.log("User context:", { userId, userRole, userName, userBarangay })
 
       // Get basic data
-      const [upcomingEvents, latestAnnouncements] = await Promise.all([getUpcomingEvents(10), getLatestAnnouncements(5)])
+      const [upcomingEvents, latestAnnouncements] = await Promise.all([getUpcomingEvents(10), getLatestAnnouncements(5, userRole)])
 
       contextData.upcomingEvents = upcomingEvents
       contextData.latestAnnouncements = latestAnnouncements

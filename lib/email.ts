@@ -1,10 +1,11 @@
-import sgMail from "@sendgrid/mail"
+import { Resend } from "resend"
 
-// Initialize SendGrid with API key
-if (!process.env.SENDGRID_API_KEY) {
-  console.error("SENDGRID_API_KEY is not defined in environment variables")
+// Initialize Resend with API key
+if (!process.env.RESEND_API_KEY) {
+  console.error("RESEND_API_KEY is not defined in environment variables")
 }
-sgMail.setApiKey(process.env.SENDGRID_API_KEY || "")
+
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 import { supabase } from "./supabase"
 import type { Announcement, User } from "./supabase"
@@ -78,17 +79,18 @@ export async function sendAnnouncementNotification(announcement: Announcement, s
     // Format email content
     const { subject, html, text } = formatEmailContent(announcement)
 
-    // Prepare emails to target users
-    const messages = targetUsers.map((user) => ({
-      to: user.email,
-      from: process.env.SENDGRID_FROM_EMAIL || "jagoyena@airisx.com",
-      subject,
-      html,
-      text,
-    }))
-
-    // Send emails to target users
-    const results = await Promise.allSettled(messages.map((msg) => sgMail.send(msg)))
+    // Send emails to target users using Resend
+    const results = await Promise.allSettled(
+      targetUsers.map((user) =>
+        resend.emails.send({
+          from: process.env.RESEND_FROM_EMAIL || "noreply@yourdomain.com",
+          to: user.email,
+          subject,
+          html,
+          text,
+        })
+      )
+    )
 
     // Count successful and failed deliveries
     const successful = results.filter((r) => r.status === "fulfilled")

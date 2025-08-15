@@ -1,6 +1,25 @@
 import { createClient } from "@supabase/supabase-js"
 import type { Database } from "@/types/supabase"
-import { createNotification } from "./notification-service"
+
+// Simple notification function to avoid circular dependency
+export async function createSimpleNotification(notification: {
+  user_id: string
+  title: string
+  content: string
+  type: string
+  reference_id?: string
+  read: boolean
+  action_url?: string
+}) {
+  try {
+    const { data, error } = await supabase.from("notifications").insert([notification]).select()
+    if (error) throw error
+    return data?.[0] || null
+  } catch (error) {
+    console.error("Error creating notification:", error)
+    return null
+  }
+}
 
 if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
   throw new Error("Missing env.NEXT_PUBLIC_SUPABASE_URL")
@@ -26,7 +45,8 @@ export type Announcement = {
   likes: number
   user_id: string
   author_photo_url?: string // Add this field
-                display_duration?: number | null // Optional: if null/undefined, displays indefinitely
+  display_duration?: number | null // Optional: if null/undefined, displays indefinitely
+  audience?: 'everyone' | 'sk_chairpersons' // Controls who can see the announcement
 }
 
 export type Comment = {
@@ -123,22 +143,23 @@ export async function getActiveAnnouncements(): Promise<Announcement[]> {
   
   const now = new Date()
   
-                // Filter announcements that are still within their display duration
-              const activeAnnouncements = (data ?? []).filter((a) => {
-                if (a.display_duration === null || a.display_duration === undefined) return true // If no duration set, always show
-                
-                const createdDate = new Date(a.created_at || "")
-                const daysSinceCreation = Math.floor((now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24))
-                
-                return daysSinceCreation <= a.display_duration
-              })
+  // Filter announcements that are still within their display duration
+  const activeAnnouncements = (data ?? []).filter((a) => {
+    if (a.display_duration === null || a.display_duration === undefined) return true // If no duration set, always show
+    
+    const createdDate = new Date(a.created_at || "")
+    const daysSinceCreation = Math.floor((now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24))
+    
+    return daysSinceCreation <= a.display_duration
+  })
 
   // Map nulls to defaults for type safety
   return activeAnnouncements.map((a) => ({
     ...a,
     created_at: a.created_at ?? "",
     likes: a.likes ?? 0,
-    user_id: a.user_id ?? ""
+    user_id: a.user_id ?? "",
+    audience: a.audience || 'everyone' // Default to 'everyone' if not set
   }))
 }
 
@@ -154,6 +175,7 @@ export async function getAnnouncementById(id: string) {
   return {
     ...data,
     author_photo_url: data.users?.photo_url || null,
+    audience: data.audience || 'everyone', // Default to 'everyone' if not set
   }
 }
 
@@ -172,6 +194,7 @@ export async function updateAnnouncement(id: string, updates: {
   content?: string
   category?: string
   display_duration?: number
+  audience?: 'everyone' | 'sk_chairpersons'
 }) {
   const { data, error } = await supabase
     .from("announcements")
@@ -348,7 +371,7 @@ export async function registerUserForEvent(eventId: string, userId: string) {
     .single()
 
   if (!eventError && eventData) {
-    await createNotification({
+    await createSimpleNotification({
       user_id: userId,
       title: "Event Registration Confirmed",
       content: `You have successfully registered for ${eventData.title} on ${eventData.date}. See you there!`,

@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { MoreHorizontal, Search, UserX, UserCog, Mail, Download, ChevronLeft, ChevronRight, Filter, Trash2 } from "lucide-react"
+import { MoreHorizontal, Search, UserX, UserCog, Mail, Download, ChevronLeft, ChevronRight, Filter, Trash2, Printer } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { supabase } from "@/lib/supabase"
 import { format } from "date-fns"
@@ -184,6 +184,111 @@ export function UserManagementTable() {
     }
   }
 
+  const handlePrintTable = () => {
+    try {
+      // Create a new window for printing
+      const printWindow = window.open('', '_blank')
+      if (!printWindow) {
+        toast.error("Please allow popups to print the table")
+        return
+      }
+
+      // Get current filters for the print header
+      const filterInfo = []
+      if (roleFilter !== "all") filterInfo.push(`Role: ${roleFilter}`)
+      if (barangayFilter !== "all") filterInfo.push(`Barangay: ${barangayFilter}`)
+      if (searchQuery) filterInfo.push(`Search: "${searchQuery}"`)
+
+             // Create the print content
+       const printContent = `
+         <!DOCTYPE html>
+         <html>
+         <head>
+           <title>SK Federation - User Management Report</title>
+           <style>
+             body { font-family: Arial, sans-serif; margin: 20px; }
+             .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #1e3a8a; padding-bottom: 20px; }
+             .title { font-size: 24px; font-weight: bold; color: #1e3a8a; margin-bottom: 10px; }
+             .subtitle { font-size: 16px; color: #6b7280; margin-bottom: 20px; }
+             .filters { margin-bottom: 20px; padding: 10px; background-color: #f3f4f6; border-radius: 5px; }
+             .filters span { margin-right: 20px; font-weight: bold; }
+             table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+             th, td { border: 1px solid #d1d5db; padding: 8px; text-align: left; }
+             th { background-color: #1e3a8a; color: white; font-weight: bold; }
+             .role-badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+             .role-admin { background-color: #1e3a8a; color: white; }
+             .role-moderator { background-color: #dc2626; color: white; }
+             .role-user { background-color: #6b7280; color: white; }
+             .footer { margin-top: 30px; text-align: center; color: #6b7280; font-size: 12px; }
+             @media print { body { margin: 0; } .no-print { display: none; } }
+           </style>
+         </head>
+         <body>
+           <div class="header">
+             <div class="title">SK Federation - User Management Report</div>
+             <div class="subtitle">Sangguniang Kabataan Lungsod ng Calapan</div>
+           </div>
+
+          ${filterInfo.length > 0 ? `
+            <div class="filters">
+              <strong>Applied Filters:</strong><br>
+              ${filterInfo.map(filter => `<span>• ${filter}</span>`).join('<br>')}
+            </div>
+          ` : ''}
+
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Barangay</th>
+                <th>Registration Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${users.map((user) => `
+                <tr>
+                  <td>${user.first_name} ${user.last_name}</td>
+                  <td>${user.email}</td>
+                  <td>
+                    <span class="role-badge role-${user.user_role}">${user.user_role}</span>
+                  </td>
+                  <td>${user.barangay || "—"}</td>
+                  <td>${format(new Date(user.created_at || ""), "MMM d, yyyy")}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <div class="footer">
+            <p>Total Users: ${users.length}</p>
+            <p>This report was generated from the SK Federation User Management System</p>
+          </div>
+        </body>
+        </html>
+      `
+
+      // Write content to the new window
+      printWindow.document.write(printContent)
+      printWindow.document.close()
+
+      // Wait for content to load then print
+      setTimeout(() => {
+        printWindow.print()
+        // Close the window after a short delay to ensure print dialog opens
+        setTimeout(() => {
+          printWindow.close()
+        }, 1000)
+      }, 100)
+
+      toast.success("Opening print preview...")
+    } catch (error) {
+      console.error("Error printing table:", error)
+      toast.error("Failed to print table")
+    }
+  }
+
   const handleEditUser = (user: User) => {
     setEditingUser(user)
     setIsEditModalOpen(true)
@@ -284,11 +389,35 @@ export function UserManagementTable() {
         return "default"
       case "moderator":
         return "destructive"
-      case "editor":
-        return "secondary"
       default:
         return "outline"
     }
+  }
+
+  const handleSendEmail = (user: User) => {
+    // Create email content with user information
+    const subject = encodeURIComponent(`Message from SK Federation Admin`)
+    const body = encodeURIComponent(`Dear ${user.first_name} ${user.last_name},
+
+I hope this message finds you well. This is a message from the SK Federation administration team.
+
+Best regards,
+SK Federation Admin Team`)
+
+    // Try to open Gmail first, fallback to Outlook
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${user.email}&su=${subject}&body=${body}`
+    const outlookUrl = `https://outlook.live.com/mail/0/deeplink/compose?to=${user.email}&subject=${subject}&body=${body}`
+
+    // Open Gmail in a new tab
+    const gmailWindow = window.open(gmailUrl, '_blank')
+    
+    // If Gmail fails to open, try Outlook
+    if (!gmailWindow || gmailWindow.closed) {
+      window.open(outlookUrl, '_blank')
+    }
+
+    // Show success message
+    toast.success(`Opening email client for ${user.first_name} ${user.last_name}`)
   }
 
   return (
@@ -317,7 +446,6 @@ export function UserManagementTable() {
               <SelectItem value="all">All Roles</SelectItem>
               <SelectItem value="admin">Admin</SelectItem>
               <SelectItem value="moderator">Moderator</SelectItem>
-              <SelectItem value="editor">Editor</SelectItem>
               <SelectItem value="user">User</SelectItem>
             </SelectContent>
           </Select>
@@ -340,6 +468,10 @@ export function UserManagementTable() {
           <Button variant="outline" onClick={handleExportCSV} className="flex items-center gap-2">
             <Download className="h-4 w-4" />
             Export CSV
+          </Button>
+          <Button variant="outline" onClick={handlePrintTable} className="flex items-center gap-2">
+            <Printer className="h-4 w-4" />
+            Print
           </Button>
         </div>
       </div>
@@ -399,7 +531,10 @@ export function UserManagementTable() {
                           <UserCog className="h-4 w-4" />
                           <span>Edit User</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="flex items-center gap-2">
+                        <DropdownMenuItem 
+                          className="flex items-center gap-2 cursor-pointer"
+                          onClick={() => handleSendEmail(user)}
+                        >
                           <Mail className="h-4 w-4" />
                           <span>Send Email</span>
                         </DropdownMenuItem>

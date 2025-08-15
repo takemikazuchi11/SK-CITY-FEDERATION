@@ -215,7 +215,6 @@ export function EditUserModal({ user, isOpen, onClose, onUserUpdated }: EditUser
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="user">User</SelectItem>
-                  <SelectItem value="editor">Editor</SelectItem>
                   <SelectItem value="moderator">Moderator</SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
                 </SelectContent>

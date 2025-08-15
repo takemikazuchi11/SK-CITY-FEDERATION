@@ -24,6 +24,7 @@ import {
   Eye,
   CheckCircle,
   XCircle,
+  Printer,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { supabase } from "@/lib/supabase"
@@ -226,6 +227,126 @@ export function KKRegistrationsTable() {
     }
   }
 
+  const handlePrintTable = () => {
+    try {
+      // Create a new window for printing
+      const printWindow = window.open('', '_blank')
+      if (!printWindow) {
+        toast.error("Please allow popups to print the table")
+        return
+      }
+
+      // Get current filters for the print header
+      const filterInfo = []
+      if (statusFilter !== "all") filterInfo.push(`Status: ${statusFilter}`)
+      if (barangayFilter !== "all") filterInfo.push(`Barangay: ${barangayFilter}`)
+      if (searchQuery) filterInfo.push(`Search: "${searchQuery}"`)
+
+      // Create the print content
+      const printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>SK Federation - KK Registrations Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #1e3a8a; padding-bottom: 20px; }
+            .title { font-size: 24px; font-weight: bold; color: #1e3a8a; margin-bottom: 10px; }
+            .subtitle { font-size: 16px; color: #6b7280; margin-bottom: 20px; }
+            .filters { margin-bottom: 20px; padding: 10px; background-color: #f3f4f6; border-radius: 5px; }
+            .filters span { margin-right: 20px; font-weight: bold; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #d1d5db; padding: 8px; text-align: left; }
+            th { background-color: #1e3a8a; color: white; font-weight: bold; }
+            .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+            .status-pending { background-color: #f59e0b; color: white; }
+            .status-approved { background-color: #10b981; color: white; }
+            .status-rejected { background-color: #ef4444; color: white; }
+            .footer { margin-top: 30px; text-align: center; color: #6b7280; font-size: 12px; }
+            @media print { body { margin: 0; } .no-print { display: none; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="title">SK Federation - KK Registrations Report</div>
+            <div class="subtitle">Sangguniang Kabataan Lungsod ng Calapan</div>
+          </div>
+
+          ${filterInfo.length > 0 ? `
+            <div class="filters">
+              <strong>Applied Filters:</strong><br>
+              ${filterInfo.map(filter => `<span>• ${filter}</span>`).join('<br>')}
+            </div>
+          ` : ''}
+
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Barangay</th>
+                <th>Age</th>
+                <th>Contact</th>
+                <th>Status</th>
+                <th>Registration Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${registrations.map((reg) => {
+                const birthDate = new Date(reg.birth_date)
+                const today = new Date()
+                let age = today.getFullYear() - birthDate.getFullYear()
+                const monthDiff = today.getMonth() - birthDate.getMonth()
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                  age--
+                }
+                
+                return `
+                  <tr>
+                    <td>${reg.first_name} ${reg.middle_name ? reg.middle_name.charAt(0) + '. ' : ''}${reg.last_name}</td>
+                    <td>${reg.barangay}</td>
+                    <td>${age} years</td>
+                    <td>
+                      <div>${reg.email}</div>
+                      <div style="font-size: 12px; color: #6b7280;">${reg.phone}</div>
+                    </td>
+                    <td>
+                      <span class="status-badge status-${reg.status}">${reg.status.charAt(0).toUpperCase() + reg.status.slice(1)}</span>
+                    </td>
+                    <td>${format(new Date(reg.created_at), "MMM d, yyyy")}</td>
+                  </tr>
+                `
+              }).join('')}
+            </tbody>
+          </table>
+
+          <div class="footer">
+            <p>Total Registrations: ${registrations.length}</p>
+            <p>This report was generated from the SK Federation KK Registration System</p>
+          </div>
+        </body>
+        </html>
+      `
+
+      // Write content to the new window
+      printWindow.document.write(printContent)
+      printWindow.document.close()
+
+      // Wait for content to load then print
+      setTimeout(() => {
+        printWindow.print()
+        // Close the window after a short delay to ensure print dialog opens
+        setTimeout(() => {
+          printWindow.close()
+        }, 1000)
+      }, 100)
+
+      toast.success("Opening print preview...")
+    } catch (error) {
+      console.error("Error printing table:", error)
+      toast.error("Failed to print table")
+    }
+  }
+
   const handleViewDetails = (registration: KKRegistration) => {
     setSelectedRegistration(registration)
   }
@@ -313,6 +434,10 @@ export function KKRegistrationsTable() {
           <Button variant="outline" onClick={handleExportCSV} className="flex items-center gap-2">
             <Download className="h-4 w-4" />
             Export CSV
+          </Button>
+          <Button variant="outline" onClick={handlePrintTable} className="flex items-center gap-2">
+            <Printer className="h-4 w-4" />
+            Print
           </Button>
         </div>
       </div>

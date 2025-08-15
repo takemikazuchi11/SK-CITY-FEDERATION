@@ -6,8 +6,8 @@ import { sendAnnouncementNotification, simulateSendAnnouncementNotification } fr
 export async function sendEmailNotification(announcement: Announcement, selectedEmails?: string[]) {
   try {
     // Check if we should use real email sending or simulation
-    // Use real emails if SENDGRID_API_KEY is set, otherwise simulate
-    const useRealEmails = !!process.env.SENDGRID_API_KEY
+    // Use real emails if RESEND_API_KEY is set, otherwise simulate
+    const useRealEmails = !!process.env.RESEND_API_KEY
 
     console.log(`Using ${useRealEmails ? "real" : "simulated"} email sending`)
     console.log(`Sending to ${selectedEmails ? selectedEmails.length : "all"} recipients`)

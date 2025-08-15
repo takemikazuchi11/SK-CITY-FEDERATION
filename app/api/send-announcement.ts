@@ -1,9 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import sgMail from "@sendgrid/mail"
+import { Resend } from "resend"
 import { getAllUsersEmails } from "@/lib/supabase" // Function to fetch all user emails
-import { sendEmail } from "@/lib/email"
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY as string)
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
@@ -32,12 +31,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     let emailErrors = 0
 
-    // 3. Send email to each user
+    // 3. Send email to each user using Resend
     for (const user of users) {
       try {
-        await sendEmail({
+        await resend.emails.send({
+          from: process.env.RESEND_FROM_EMAIL || "noreply@yourdomain.com",
           to: user.email,
-          subject: ` ${title}`,
+          subject: `New Announcement: ${title}`,
           html: `
               <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
                 <h1 style="color: #333;">${title}</h1>
@@ -62,8 +62,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       emailErrors,
     })
   } catch (error) {
-    console.error("Error in send-announcement API:", error)
-    return res.status(500).json({ error: "Internal Server Error" })
+    console.error("Error sending announcement emails:", error)
+    return res.status(500).json({ error: "Internal server error" })
   }
 }
 

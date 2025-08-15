@@ -11,7 +11,7 @@ import { toast } from "react-hot-toast"
 import { EventRegistrationButton } from "@/components/event-registration-button"
 import { AdminOnly } from "@/components/role-based-ui"
 import { useAuth } from "@/lib/auth-context"
-import { createNotification } from "@/lib/notification-service"
+import { createSimpleNotification } from "@/lib/supabase"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -73,7 +73,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
       .eq("status", "confirmed")
     if (!partError && participants && participants.length > 0) {
       for (const participant of participants) {
-        await createNotification({
+        await createSimpleNotification({
           user_id: participant.user_id,
           title: "Event Cancelled",
           content: `We’re sorry, but ${event.title} scheduled for ${event.date} has been cancelled.`,

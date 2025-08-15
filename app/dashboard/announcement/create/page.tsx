@@ -39,6 +39,7 @@ export default function CreateAnnouncement() {
   const [notificationMode, setNotificationMode] = useState<"all" | "selected">("all")
   const [selectedUsers, setSelectedUsers] = useState<string[]>([])
   const [isEmailSectionOpen, setIsEmailSectionOpen] = useState(false)
+  const [audience, setAudience] = useState<'everyone' | 'sk_chairpersons'>('everyone')
   const [notificationStatus, setNotificationStatus] = useState<{
     status: "idle" | "sending" | "success" | "error"
     message?: string
@@ -57,6 +58,7 @@ export default function CreateAnnouncement() {
         setContent(data.content || "");
         setCategory(data.category || "general");
         setDisplayDuration(data.display_duration);
+        setAudience(data.audience || "everyone");
       })();
     }
   }, [editId]);
@@ -109,7 +111,7 @@ export default function CreateAnnouncement() {
       let announcementResult;
       if (editId) {
         // Update existing
-        announcementResult = await updateAnnouncement(editId, { title, content, category, display_duration: displayDuration || undefined });
+        announcementResult = await updateAnnouncement(editId, { title, content, category, display_duration: displayDuration || undefined, audience });
         toast({
           title: "Announcement updated",
           description: "Your announcement has been updated successfully",
@@ -126,6 +128,7 @@ export default function CreateAnnouncement() {
           category,
           user_id: user.id,
           display_duration: displayDuration || undefined,
+          audience,
         });
         toast({
           title: "Announcement created",
@@ -143,7 +146,14 @@ export default function CreateAnnouncement() {
       setNotificationStatus({ status: "sending" })
 
       // Determine which emails to send to based on the notification mode
-      const emailsToSend = notificationMode === "selected" ? selectedUsers : undefined
+      let emailsToSend: string[] | undefined;
+      
+      if (notificationMode === "selected") {
+        emailsToSend = selectedUsers;
+      } else {
+        // Send to all users when not selecting specific users
+        emailsToSend = undefined;
+      }
 
       // Transform the announcement result to match the expected type
       const transformedAnnouncement = {
@@ -200,17 +210,29 @@ export default function CreateAnnouncement() {
             <CardTitle>Create New Announcement</CardTitle>
           </CardHeader>
           <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Title *</Label>
-                <Input
-                  id="title"
-                  placeholder="Enter announcement title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                />
-              </div>
+                         <CardContent className="space-y-4">
+               <div className="flex items-center gap-3 mb-2">
+                 <Switch
+                   id="audience-switch"
+                   checked={audience === 'everyone'}
+                   onCheckedChange={checked => setAudience(checked ? 'everyone' : 'sk_chairpersons')}
+                 />
+                 <Mail className="h-5 w-5 text-muted-foreground" />
+                 <Label htmlFor="audience-switch" className="cursor-pointer select-none">
+                   {audience === 'everyone' ? 'Send Announcement to Everyone' : 'Send Announcement to SK Chairpersons'}
+                 </Label>
+               </div>
+               
+               <div className="space-y-2">
+                 <Label htmlFor="title">Title *</Label>
+                 <Input
+                   id="title"
+                   placeholder="Enter announcement title"
+                   value={title}
+                   onChange={(e) => setTitle(e.target.value)}
+                   required
+                 />
+               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="category">Category *</Label>
@@ -244,17 +266,17 @@ export default function CreateAnnouncement() {
                 </p>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="content">Content *</Label>
-                <Textarea
-                  id="content"
-                  placeholder="Enter announcement details"
-                  rows={6}
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  required
-                />
-              </div>
+                             <div className="space-y-2">
+                 <Label htmlFor="content">Content *</Label>
+                 <Textarea
+                   id="content"
+                   placeholder="Enter announcement details"
+                   rows={6}
+                   value={content}
+                   onChange={(e) => setContent(e.target.value)}
+                   required
+                 />
+               </div>
 
               <Collapsible
                 open={isEmailSectionOpen}

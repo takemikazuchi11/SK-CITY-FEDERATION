@@ -26,7 +26,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Download, Search, ChevronLeft, ChevronRight, Filter, MoreHorizontal, Trash2, Mail } from "lucide-react"
+import { Download, Search, ChevronLeft, ChevronRight, Filter, MoreHorizontal, Trash2, Mail, Printer } from "lucide-react"
 import { toast } from "sonner"
 
 const feedbackPerPage = 10
@@ -177,6 +177,116 @@ SKCF Admin Team`)
     }
   }
 
+  function handlePrintTable() {
+    try {
+      // Create a new window for printing
+      const printWindow = window.open('', '_blank')
+      if (!printWindow) {
+        toast.error("Please allow popups to print the table")
+        return
+      }
+
+      // Get current filters for the print header
+      const filterInfo = []
+      if (eventFilter !== "all") {
+        const selectedEvent = events.find(e => e.id === eventFilter)
+        if (selectedEvent) filterInfo.push(`Event: ${selectedEvent.title}`)
+      }
+      if (ratingFilter !== "all") filterInfo.push(`Rating: ${ratingFilter} Stars`)
+      if (searchQuery) filterInfo.push(`Search: "${searchQuery}"`)
+
+      // Create the print content
+      const printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>SK Federation - Event Feedback Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #1e3a8a; padding-bottom: 20px; }
+            .title { font-size: 24px; font-weight: bold; color: #1e3a8a; margin-bottom: 10px; }
+            .subtitle { font-size: 16px; color: #6b7280; margin-bottom: 20px; }
+            .filters { margin-bottom: 20px; padding: 10px; background-color: #f3f4f6; border-radius: 5px; }
+            .filters span { margin-right: 20px; font-weight: bold; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #d1d5db; padding: 8px; text-align: left; }
+            th { background-color: #1e3a8a; color: white; font-weight: bold; }
+            .rating { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+            .rating-5 { background-color: #10b981; color: white; }
+            .rating-4 { background-color: #22c55e; color: white; }
+            .rating-3 { background-color: #f59e0b; color: white; }
+            .rating-2 { background-color: #f97316; color: white; }
+            .rating-1 { background-color: #ef4444; color: white; }
+            .footer { margin-top: 30px; text-align: center; color: #6b7280; font-size: 12px; }
+            @media print { body { margin: 0; } .no-print { display: none; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="title">SK Federation - Event Feedback Report</div>
+            <div class="subtitle">Sangguniang Kabataan Lungsod ng Calapan</div>
+          </div>
+
+          ${filterInfo.length > 0 ? `
+            <div class="filters">
+              <strong>Applied Filters:</strong><br>
+              ${filterInfo.map(filter => `<span>• ${filter}</span>`).join('<br>')}
+            </div>
+          ` : ''}
+
+          <table>
+            <thead>
+              <tr>
+                <th>Event</th>
+                <th>User</th>
+                <th>Rating</th>
+                <th>Comments</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${feedback.map((fb) => `
+                <tr>
+                  <td>${fb.events?.title || fb.event_id}</td>
+                  <td>${fb.users ? `${fb.users.first_name} ${fb.users.last_name}` : fb.user_id}</td>
+                  <td>
+                    <span class="rating rating-${fb.rating}">${fb.rating} Stars</span>
+                  </td>
+                  <td>${fb.comments || "—"}</td>
+                  <td>${new Date(fb.created_at).toLocaleDateString()}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <div class="footer">
+            <p>Total Feedback Entries: ${feedback.length}</p>
+            <p>This report was generated from the SK Federation Event Feedback System</p>
+          </div>
+        </body>
+        </html>
+      `
+
+      // Write content to the new window
+      printWindow.document.write(printContent)
+      printWindow.document.close()
+
+      // Wait for content to load then print
+      setTimeout(() => {
+        printWindow.print()
+        // Close the window after a short delay to ensure print dialog opens
+        setTimeout(() => {
+          printWindow.close()
+        }, 1000)
+      }, 100)
+
+      toast.success("Opening print preview...")
+    } catch (error) {
+      console.error("Error printing table:", error)
+      toast.error("Failed to print table")
+    }
+  }
+
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
     setCurrentPage(1)
@@ -229,10 +339,14 @@ SKCF Admin Team`)
                   ))}
                 </SelectContent>
               </Select>
-              <Button variant="outline" onClick={handleExportCSV} className="flex items-center gap-2">
-                <Download className="h-4 w-4" />
-                Export CSV
-              </Button>
+                        <Button variant="outline" onClick={handleExportCSV} className="flex items-center gap-2">
+            <Download className="h-4 w-4" />
+            Export CSV
+          </Button>
+          <Button variant="outline" onClick={handlePrintTable} className="flex items-center gap-2">
+            <Printer className="h-4 w-4" />
+            Print
+          </Button>
             </div>
           </div>
           <div className="rounded-md border">

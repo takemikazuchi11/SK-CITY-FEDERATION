@@ -44,6 +44,7 @@ export default function AnnouncementList() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [announcementToEdit, setAnnouncementToEdit] = useState<Announcement | null>(null);
   const [editForm, setEditForm] = useState({ title: "", content: "" });
+  const [editAudience, setEditAudience] = useState<'everyone' | 'sk_chairpersons'>('everyone');
   const [isEditing, setIsEditing] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -51,6 +52,7 @@ export default function AnnouncementList() {
   const [isPoll, setIsPoll] = useState(false);
   const [pollQuestion, setPollQuestion] = useState("");
   const [pollOptions, setPollOptions] = useState(["", ""]); // Start with 2 options
+  const [audience, setAudience] = useState<'everyone' | 'sk_chairpersons'>('everyone');
 
   // Add poll voting/results logic
   type PollOption = Database["public"]["Tables"]["poll_options"]["Row"];
@@ -209,6 +211,7 @@ export default function AnnouncementList() {
   const handleEditClick = (announcement: Announcement) => {
     setAnnouncementToEdit(announcement);
     setEditForm({ title: announcement.title, content: announcement.content });
+    setEditAudience(announcement.audience || 'everyone');
     setEditDialogOpen(true);
   };
 
@@ -225,12 +228,12 @@ export default function AnnouncementList() {
       const updated = { ...announcementToEdit, ...editForm };
       const { data, error } = await supabase
         .from("announcements")
-        .update({ title: editForm.title, content: editForm.content })
+        .update({ title: editForm.title, content: editForm.content, audience: editAudience })
         .eq("id", announcementToEdit.id)
         .select();
       if (error) throw error;
       // Update local state
-      setAnnouncements((prev) => prev.map((a) => (a.id === announcementToEdit.id ? { ...a, ...editForm } : a)));
+      setAnnouncements((prev) => prev.map((a) => (a.id === announcementToEdit.id ? { ...a, ...editForm, audience: editAudience } : a)));
       setEditDialogOpen(false);
       setAnnouncementToEdit(null);
     } catch (err) {
@@ -271,6 +274,7 @@ export default function AnnouncementList() {
           category: isPoll ? "poll" : "general", 
           likes: 0, 
           user_id: user?.id ?? "",
+          audience,
           // No default display duration - will display indefinitely
         }])
         .select();
@@ -307,6 +311,7 @@ export default function AnnouncementList() {
       setIsPoll(false);
       setPollQuestion("");
       setPollOptions(["", ""]);
+      setAudience('everyone');
     } catch (err: any) {
       toast({ title: "Error", description: err.message || "Failed to create announcement.", variant: "destructive" });
     } finally {
@@ -371,7 +376,14 @@ export default function AnnouncementList() {
                 <div className="flex-1 flex flex-col justify-between p-6">
                 <Link href={`/dashboard/announcement/${announcement.id}`} onClick={() => setLoading(true)}>
                   <CardHeader className="p-0 mb-2">
-                    <CardTitle className="text-2xl font-bold text-blue-900 group-hover:text-blue-800 transition-colors duration-200">{announcement.title}</CardTitle>
+                    <div className="flex items-start justify-between">
+                      <CardTitle className="text-2xl font-bold text-blue-900 group-hover:text-blue-800 transition-colors duration-200">{announcement.title}</CardTitle>
+                      {announcement.audience === 'sk_chairpersons' && (
+                        <div className="ml-2 px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">
+                          SK Only
+                        </div>
+                      )}
+                    </div>
                   </CardHeader>
                   <CardContent className="p-0">
                     <p className="line-clamp-3 text-gray-700 mb-4">{announcement.content}</p>
@@ -471,6 +483,17 @@ export default function AnnouncementList() {
               rows={4}
               required
             />
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="edit-audience-switch"
+                checked={editAudience === 'everyone'}
+                onChange={e => setEditAudience(e.target.checked ? 'everyone' : 'sk_chairpersons')}
+              />
+              <label htmlFor="edit-audience-switch">
+                {editAudience === 'everyone' ? 'Send Announcement to Everyone' : 'Send Announcement to SK Chairpersons'}
+              </label>
+            </div>
             <DialogFooter>
               <Button type="submit" disabled={isEditing}>{isEditing ? "Saving..." : "Save Changes"}</Button>
               <DialogClose asChild>
@@ -505,6 +528,17 @@ export default function AnnouncementList() {
             <div className="flex items-center gap-2">
               <input type="checkbox" id="isPoll" checked={isPoll} onChange={e => setIsPoll(e.target.checked)} />
               <label htmlFor="isPoll">Poll Announcement</label>
+            </div>
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="audience-switch"
+                checked={audience === 'everyone'}
+                onChange={e => setAudience(e.target.checked ? 'everyone' : 'sk_chairpersons')}
+              />
+              <label htmlFor="audience-switch">
+                {audience === 'everyone' ? 'Send Announcement to Everyone' : 'Send Announcement to SK Chairpersons'}
+              </label>
             </div>
             {isPoll && (
               <div className="space-y-2 border rounded p-3">

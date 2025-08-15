@@ -29,6 +29,7 @@ import {
   UserCheck,
   Filter,
   Mail,
+  Printer,
 } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { format } from "date-fns"
@@ -385,6 +386,126 @@ export function EventParticipantsModal({ event, isOpen, onClose }: EventParticip
     }
   }
 
+  const handlePrintTable = () => {
+    try {
+      // Create a new window for printing
+      const printWindow = window.open('', '_blank')
+      if (!printWindow) {
+        toast.error("Please allow popups to print the table")
+        return
+      }
+
+      // Get current filters for the print header
+      const filterInfo = []
+      if (statusFilter !== "all") filterInfo.push(`Status: ${statusFilter}`)
+      if (attendanceFilter !== "all") filterInfo.push(`Attendance: ${attendanceFilter}`)
+      if (searchQuery) filterInfo.push(`Search: "${searchQuery}"`)
+
+      // Create the print content
+      const printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>SK Federation - Event Participants Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #1e3a8a; padding-bottom: 20px; }
+            .title { font-size: 24px; font-weight: bold; color: #1e3a8a; margin-bottom: 10px; }
+            .subtitle { font-size: 16px; color: #6b7280; margin-bottom: 20px; }
+            .event-info { margin-bottom: 20px; padding: 15px; background-color: #f3f4f6; border-radius: 5px; }
+            .event-info h3 { margin: 0 0 10px 0; color: #1e3a8a; }
+            .event-info p { margin: 5px 0; color: #6b7280; }
+            .filters { margin-bottom: 20px; padding: 10px; background-color: #f3f4f6; border-radius: 5px; }
+            .filters span { margin-right: 20px; font-weight: bold; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #d1d5db; padding: 8px; text-align: left; }
+            th { background-color: #1e3a8a; color: white; font-weight: bold; }
+            .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+            .status-confirmed { background-color: #10b981; color: white; }
+            .status-waitlisted { background-color: #f59e0b; color: white; }
+            .status-cancelled { background-color: #ef4444; color: white; }
+            .attendance-yes { background-color: #10b981; color: white; }
+            .attendance-no { background-color: #6b7280; color: white; }
+            .footer { margin-top: 30px; text-align: center; color: #6b7280; font-size: 12px; }
+            @media print { body { margin: 0; } .no-print { display: none; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="title">SK Federation - Event Participants Report</div>
+            <div class="subtitle">Sangguniang Kabataan Lungsod ng Calapan</div>
+          </div>
+
+          <div class="event-info">
+            <h3>Event Details</h3>
+            <p><strong>Title:</strong> ${event.title}</p>
+            <p><strong>Date:</strong> ${format(new Date(event.date), "MMMM d, yyyy")}</p>
+            <p><strong>Location:</strong> ${event.location}</p>
+            <p><strong>Capacity:</strong> ${event.capacity} participants</p>
+          </div>
+
+          ${filterInfo.length > 0 ? `
+            <div class="filters">
+              <strong>Applied Filters:</strong><br>
+              ${filterInfo.map(filter => `<span>• ${filter}</span>`).join('<br>')}
+            </div>
+          ` : ''}
+
+          <table>
+            <thead>
+              <tr>
+                <th>Participant</th>
+                <th>Registration Date</th>
+                <th>Status</th>
+                <th>Attended</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filteredParticipants.map((p) => `
+                <tr>
+                  <td>${p.user.first_name} ${p.user.last_name}<br><small style="color: #6b7280;">${p.user.email}</small></td>
+                  <td>${format(new Date(p.registration_date), "MMM d, yyyy")}</td>
+                  <td>
+                    <span class="status-badge status-${p.status}">${p.status.charAt(0).toUpperCase() + p.status.slice(1)}</span>
+                  </td>
+                  <td>
+                    <span class="attendance-${p.attended ? 'yes' : 'no'}">${p.attended ? 'Yes' : 'No'}</span>
+                  </td>
+                  <td>${p.notes || "—"}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <div class="footer">
+            <p>Total Participants: ${filteredParticipants.length}</p>
+            <p>This report was generated from the SK Federation Event Participants System</p>
+          </div>
+        </body>
+        </html>
+      `
+
+      // Write content to the new window
+      printWindow.document.write(printContent)
+      printWindow.document.close()
+
+      // Wait for content to load then print
+      setTimeout(() => {
+        printWindow.print()
+        // Close the window after a short delay to ensure print dialog opens
+        setTimeout(() => {
+          printWindow.close()
+        }, 1000)
+      }, 100)
+
+      toast.success("Opening print preview...")
+    } catch (error) {
+      console.error("Error printing table:", error)
+      toast.error("Failed to print table")
+    }
+  }
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "confirmed":
@@ -483,6 +604,10 @@ export function EventParticipantsModal({ event, isOpen, onClose }: EventParticip
             <Button variant="outline" onClick={handleExportCSV} className="flex items-center gap-2">
               <Download className="h-4 w-4" />
               Export CSV
+            </Button>
+            <Button variant="outline" onClick={handlePrintTable} className="flex items-center gap-2">
+              <Printer className="h-4 w-4" />
+              Print
             </Button>
           </div>
         </div>

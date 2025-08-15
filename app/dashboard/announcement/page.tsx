@@ -51,13 +51,26 @@ export default function AnnouncementsPage() {
 
         if (error) throw error
 
-        // Ensure proper data mapping with null safety
-        let filtered = (data || []).map(a => ({
+        // Filter announcements based on audience and user role
+        let filtered = (data || []).filter(a => {
+          // If announcement is for everyone, show it to all users
+          if (!a.audience || a.audience === 'everyone') {
+            return true;
+          }
+          
+          // If announcement is for SK Chairpersons only, show it only to admin and moderator roles
+          if (a.audience === 'sk_chairpersons') {
+            return user?.user_role === 'admin' || user?.user_role === 'moderator';
+          }
+          
+          return true;
+        }).map(a => ({
           ...a,
           created_at: a.created_at ?? '',
           likes: a.likes ?? 0,
           user_id: a.user_id ?? '',
         }));
+        
         setAnnouncements(filtered)
         setFilteredAnnouncements(filtered)
       } catch (error) {
@@ -186,8 +199,17 @@ export default function AnnouncementsPage() {
                     </div>
                   )}
                   <CardHeader>
-                    <CardTitle className="line-clamp-2">{announcement.title}</CardTitle>
-                    <CardDescription>{formatDate(announcement.created_at)}</CardDescription>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="line-clamp-2">{announcement.title}</CardTitle>
+                        <CardDescription>{formatDate(announcement.created_at)}</CardDescription>
+                      </div>
+                      {announcement.audience === 'sk_chairpersons' && (
+                        <div className="ml-2 px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">
+                          SK Only
+                        </div>
+                      )}
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <p className="line-clamp-3 text-gray-600">{announcement.content}</p>
@@ -247,8 +269,17 @@ export default function AnnouncementsPage() {
                       </div>
                     )}
                     <CardHeader>
-                      <CardTitle className="line-clamp-2">{announcement.title}</CardTitle>
-                      <CardDescription>{formatDate(announcement.created_at)}</CardDescription>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="line-clamp-2">{announcement.title}</CardTitle>
+                          <CardDescription>{formatDate(announcement.created_at)}</CardDescription>
+                        </div>
+                        {announcement.audience === 'sk_chairpersons' && (
+                          <div className="ml-2 px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">
+                            SK Only
+                          </div>
+                        )}
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <p className="line-clamp-3 text-gray-600">{announcement.content}</p>

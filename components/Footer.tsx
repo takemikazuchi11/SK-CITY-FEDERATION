@@ -49,16 +49,16 @@ export default function Footer() {
   const { setLoading } = useLoading();
 
   return (
-    <footer className="bg-red-50 text-gray-800 py-12">
+    <footer className="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 text-white py-12">
       <div className="container mx-auto px-4">
         {/* Top Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
           {/* NYC Logo and Description */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-lg font-semibold">SANGGUNIANG KABATAAN LUNGSOD NG CALAPAN</span>
+              <span className="text-lg font-semibold text-white">SANGGUNIANG KABATAAN LUNGSOD NG CALAPAN</span>
             </div>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-blue-200">
               The Sangguniang Kabataan serves as the advocate of the youth, championing policies and programs that
               prioritize their needs and empower their voices nationwide.
             </p>
@@ -67,24 +67,24 @@ export default function Footer() {
           {/* Republic Seal */}
           <div className="flex flex-col items-center justify-center">
             <Image src={RNP} alt="Republic Seal" width={100} height={100} className="mb-4" />
-            <span className="text-lg font-semibold">REPUBLIC OF THE PHILIPPINES</span>
-            <p className="text-sm text-gray-600 mt-2">All contents is in the public domain unless otherwise stated</p>
+            <span className="text-lg font-semibold text-white">REPUBLIC OF THE PHILIPPINES</span>
+            <p className="text-sm text-blue-200 mt-2">All contents is in the public domain unless otherwise stated</p>
           </div>
 
           {/* Social Media Icons */}
           <div className="flex justify-end gap-4">
             <Link
               href="https://web.facebook.com/OneSKCalapan/?_rdc=1&_rdr#"
-              className="hover:text-blue-600 transition-colors"
+              className="hover:text-red-400 transition-colors text-blue-200"
             >
               <Facebook className="h-6 w-6" />
               <span className="sr-only">Facebook</span>
             </Link>
-            <Link href="#" className="hover:text-blue-400 transition-colors">
+            <Link href="#" className="hover:text-red-400 transition-colors text-blue-200">
               <Twitter className="h-6 w-6" />
               <span className="sr-only">Twitter</span>
             </Link>
-            <Link href="#" className="hover:text-pink-600 transition-colors">
+            <Link href="#" className="hover:text-red-400 transition-colors text-blue-200">
               <Instagram className="h-6 w-6" />
               <span className="sr-only">Instagram</span>
             </Link>
@@ -95,17 +95,17 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* About GOVPH */}
           <div>
-            <h3 className="font-semibold mb-4">{footerLinks.aboutGOVPH.title}</h3>
-            <p className="text-sm text-gray-600">{footerLinks.aboutGOVPH.description}</p>
+            <h3 className="font-semibold mb-4 text-white">{footerLinks.aboutGOVPH.title}</h3>
+            <p className="text-sm text-blue-200">{footerLinks.aboutGOVPH.description}</p>
           </div>
 
           {/* Executive */}
           <div>
-            <h3 className="font-semibold mb-4">{footerLinks.executive.title}</h3>
+            <h3 className="font-semibold mb-4 text-white">{footerLinks.executive.title}</h3>
             <ul className="space-y-2">
               {footerLinks.executive.links.map((link) => (
                 <li key={link.text}>
-                  <Link href={link.href} className="text-sm text-gray-600 hover:text-gray-900" onClick={() => setLoading(true)}>
+                  <Link href={link.href} className="text-sm text-blue-200 hover:text-red-300 transition-colors" onClick={() => setLoading(true)}>
                     {link.text}
                   </Link>
                 </li>
@@ -115,11 +115,11 @@ export default function Footer() {
 
           {/* Judiciary */}
           <div>
-            <h3 className="font-semibold mb-4">{footerLinks.judiciary.title}</h3>
+            <h3 className="font-semibold mb-4 text-white">{footerLinks.judiciary.title}</h3>
             <ul className="space-y-2">
               {footerLinks.judiciary.links.map((link) => (
                 <li key={link.text}>
-                  <Link href={link.href} className="text-sm text-gray-600 hover:text-gray-900" onClick={() => setLoading(true)}>
+                  <Link href={link.href} className="text-sm text-blue-200 hover:text-red-300 transition-colors" onClick={() => setLoading(true)}>
                     {link.text}
                   </Link>
                 </li>
@@ -129,11 +129,11 @@ export default function Footer() {
 
           {/* Legislative */}
           <div>
-            <h3 className="font-semibold mb-4">{footerLinks.legislative.title}</h3>
+            <h3 className="font-semibold mb-4 text-white">{footerLinks.legislative.title}</h3>
             <ul className="space-y-2">
               {footerLinks.legislative.links.map((link) => (
                 <li key={link.text}>
-                  <Link href={link.href} className="text-sm text-gray-600 hover:text-gray-900" onClick={() => setLoading(true)}>
+                  <Link href={link.href} className="text-sm text-blue-200 hover:text-red-300 transition-colors" onClick={() => setLoading(true)}>
                     {link.text}
                   </Link>
                 </li>
@@ -143,11 +143,11 @@ export default function Footer() {
 
           {/* Other Agencies */}
           <div>
-            <h3 className="font-semibold mb-4">{footerLinks.otherAgencies.title}</h3>
+            <h3 className="font-semibold mb-4 text-white">{footerLinks.otherAgencies.title}</h3>
             <ul className="space-y-2">
               {footerLinks.otherAgencies.links.map((link) => (
                 <li key={link.text}>
-                  <Link href={link.href} className="text-sm text-gray-600 hover:text-gray-900" onClick={() => setLoading(true)}>
+                  <Link href={link.href} className="text-sm text-blue-200 hover:text-red-300 transition-colors" onClick={() => setLoading(true)}>
                     {link.text}
                   </Link>
                 </li>

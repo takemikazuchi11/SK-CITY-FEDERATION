@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { supabase } from "@/lib/supabase"
 import { toast } from "react-hot-toast"
 import { AdminOnly } from "@/components/role-based-ui"
-import { createNotification } from "@/lib/notification-service"
+import { createSimpleNotification } from "@/lib/supabase"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 
 // Update the Event interface to include the logo and feedback_url fields
@@ -98,7 +98,7 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
           .eq("status", "confirmed")
         if (!partError && participants && participants.length > 0) {
           for (const participant of participants) {
-            await createNotification({
+            await createSimpleNotification({
               user_id: participant.user_id,
               title: "Event Updated",
               content: `Update: ${event.title} has changed. New date/time/location: ${event.date} ${event.time} at ${event.location}. Please check the event details.`,

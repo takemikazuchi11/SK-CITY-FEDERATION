@@ -117,7 +117,7 @@ export async function getLatestEvents(limit = 2) {
   return upcomingEvents || []
 }
 
-export async function getLatestAnnouncements(limit: number) {
+export async function getLatestAnnouncements(limit: number, userRole?: string) {
   const { data, error } = await supabase
     .from("announcements")
     .select("*")
@@ -129,7 +129,22 @@ export async function getLatestAnnouncements(limit: number) {
     return []
   }
 
-  return data
+  // Filter announcements based on audience and user role
+  const filtered = (data || []).filter(a => {
+    // If announcement is for everyone, show it to all users
+    if (!a.audience || a.audience === 'everyone') {
+      return true;
+    }
+    
+    // If announcement is for SK Chairpersons only, show it only to admin and moderator roles
+    if (a.audience === 'sk_chairpersons') {
+      return userRole === 'admin' || userRole === 'moderator';
+    }
+    
+    return true;
+  });
+
+  return filtered
 }
 
 export async function getAnnouncementById(id: number) {
