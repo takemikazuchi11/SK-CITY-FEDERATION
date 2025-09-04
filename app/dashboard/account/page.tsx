@@ -12,7 +12,19 @@ import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import { supabase } from "@/lib/supabase"
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select"
-import { MapPinIcon } from "lucide-react"
+import { MapPinIcon, AlertTriangle } from "lucide-react"
+import { deleteUserAccount } from "@/app/action/account-actions"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 // List of barangays in San Juan City
 const BARANGAYS = [
@@ -28,6 +40,9 @@ export default function AccountPage() {
   const [barangay, setBarangay] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [photoUrl, setPhotoUrl] = useState("")
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [deleteConfirmation, setDeleteConfirmation] = useState("")
 
   useEffect(() => {
     if (user) {
@@ -101,6 +116,52 @@ export default function AccountPage() {
       setIsLoading(false)
     }
   }
+
+  const handleDeleteAccount = async () => {
+    console.log("Delete account clicked, confirmation:", deleteConfirmation)
+    
+    if (deleteConfirmation !== "DELETE") {
+      toast.error("Please type 'DELETE' to confirm account deletion")
+      return
+    }
+
+    // Test if the function is being called
+    console.log("Function is being called - proceeding with deletion")
+    toast.info("Starting account deletion process...")
+
+    setIsDeleting(true)
+    console.log("Starting account deletion process...")
+    
+    try {
+      console.log("Calling deleteUserAccount server action with userId:", user?.id)
+      const result = await deleteUserAccount(user?.id || "")
+      console.log("Server action result:", result)
+      
+      if (result.success) {
+        console.log("Account deletion successful")
+        toast.success("Account deleted successfully")
+        // Clear localStorage and redirect
+        localStorage.removeItem("user")
+        window.location.href = "/login?message=account-deleted"
+      } else {
+        console.error("Account deletion failed:", result.error)
+        toast.error(result.error || "Failed to delete account")
+        setShowDeleteDialog(false)
+      }
+    } catch (error) {
+      console.error("Error deleting account:", error)
+      toast.error("An unexpected error occurred while deleting your account")
+      setShowDeleteDialog(false)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const handleDialogClose = () => {
+    setShowDeleteDialog(false)
+    setDeleteConfirmation("")
+  }
+
 
   if (!user) {
     return <div className="p-4">Loading...</div>
@@ -219,14 +280,84 @@ export default function AccountPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <h3 className="text-sm font-medium">Delete Account</h3>
+                  <h3 className="text-sm font-medium text-red-600">Delete Account</h3>
                   <p className="text-sm text-muted-foreground">
-                    Permanently delete your account and all of your content.
+                    Permanently delete your account and all of your content. This action cannot be undone.
                   </p>
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-3">
+                    <div className="flex items-start space-x-2">
+                      <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                      <div className="text-sm text-red-800">
+                        <p className="font-medium">Warning: This action is irreversible</p>
+                        <ul className="mt-1 space-y-1 text-xs">
+                          <li>• All your profile data will be permanently deleted</li>
+                          <li>• You will lose access to all events and announcements</li>
+                          <li>• Your account cannot be recovered</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
               <CardFooter>
-                <Button variant="destructive">Delete account</Button>
+                <Button 
+                  variant="destructive" 
+                  disabled={isDeleting}
+                  onClick={() => {
+                    console.log("Delete account button clicked")
+                    setShowDeleteDialog(true)
+                  }}
+                >
+                  {isDeleting ? "Deleting..." : "Delete account"}
+                </Button>
+                <AlertDialog open={showDeleteDialog} onOpenChange={handleDialogClose}>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="flex items-center space-x-2">
+                        <AlertTriangle className="h-5 w-5 text-red-600" />
+                        <span>Delete Account</span>
+                      </AlertDialogTitle>
+                      <AlertDialogDescription className="space-y-3">
+                        <p>
+                          Are you sure you want to delete your account? This action cannot be undone.
+                        </p>
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                          <p className="text-sm font-medium text-red-800 mb-2">This will permanently:</p>
+                          <ul className="text-sm text-red-700 space-y-1">
+                            <li>• Delete your profile and all personal information</li>
+                            <li>• Remove your access to all events and announcements</li>
+                            <li>• Cancel any event registrations</li>
+                            <li>• Delete all your account data from our systems</li>
+                          </ul>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium text-gray-900">
+                            Type <span className="bg-gray-100 px-1 rounded font-mono">DELETE</span> to confirm:
+                          </p>
+                          <Input
+                            value={deleteConfirmation}
+                            onChange={(e) => setDeleteConfirmation(e.target.value)}
+                            placeholder="Type DELETE to confirm"
+                            className="font-mono"
+                            disabled={isDeleting}
+                          />
+                        </div>
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel disabled={isDeleting} onClick={handleDialogClose}>
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDeleteAccount}
+                        disabled={isDeleting || deleteConfirmation !== "DELETE"}
+                        className="bg-red-600 hover:bg-red-700 focus:ring-red-600 disabled:opacity-50"
+                      >
+                        {isDeleting ? "Deleting Account..." : "Yes, Delete My Account"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </CardFooter>
             </Card>
           </div>

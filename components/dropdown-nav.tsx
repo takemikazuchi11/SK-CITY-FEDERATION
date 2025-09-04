@@ -47,7 +47,16 @@ export function DropdownNav({ items, variant = "user" }: DropdownNavProps) {
   }
 
   const isActive = (href: string) => {
+    if (href === "/dashboard") {
+      return pathname === "/dashboard"
+    }
     return pathname === href || pathname.startsWith(`${href}/`)
+  }
+
+  // Check if any child of a dropdown item is active
+  const isParentActive = (item: NavItem) => {
+    if (!item.children) return false
+    return item.children.some(child => isActive(child.href))
   }
 
   const bgColor = variant === "admin" ? "bg-blue-600" : "bg-blue-600"
@@ -80,6 +89,7 @@ export function DropdownNav({ items, variant = "user" }: DropdownNavProps) {
                       "flex items-center px-3 py-2 rounded-md text-sm font-medium",
                       hoverBgColor,
                       openDropdown === item.title ? "bg-blue-700" : "",
+                      isParentActive(item) ? "bg-blue-700 font-semibold" : "",
                     )}
                     aria-expanded={openDropdown === item.title}
                   >
@@ -169,7 +179,10 @@ export function DropdownNav({ items, variant = "user" }: DropdownNavProps) {
                   <>
                     <button
                       onClick={() => toggleDropdown(item.title)}
-                      className="w-full flex items-center justify-between px-3 py-2 rounded-md text-base font-medium text-white hover:bg-blue-800"
+                      className={cn(
+                        "w-full flex items-center justify-between px-3 py-2 rounded-md text-base font-medium text-white hover:bg-blue-800",
+                        isParentActive(item) ? "bg-blue-800 font-semibold" : "",
+                      )}
                     >
                       {item.title}
                       <ChevronDown

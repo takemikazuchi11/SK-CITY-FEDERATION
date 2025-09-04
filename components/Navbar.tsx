@@ -5,6 +5,8 @@ import { useState } from "react"
 import { Menu, X } from "lucide-react"
 import AuthButtons from "./AuthButtons"
 import { useLoading } from "@/lib/loading-context"
+import { usePathname } from "next/navigation"
+import { cn } from "@/lib/utils"
 
 const navItems = [
   { name: "Home", href: "/" },
@@ -16,7 +18,16 @@ const navItems = [
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
-  const { setLoading } = useLoading();
+  const { setLoading } = useLoading()
+  const pathname = usePathname()
+
+  const isActive = (href: string) => {
+    if (href === "/") {
+      return pathname === "/"
+    }
+    // For other pages, match exact path or paths that start with href + "/"
+    return pathname === href || pathname.startsWith(href + "/")
+  }
 
   return (
     <nav className="fixed top-0 w-full bg-blue-600 text-white z-10">
@@ -33,7 +44,10 @@ export default function Navbar() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition duration-150 ease-in-out"
+                  className={cn(
+                    "px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition duration-150 ease-in-out",
+                    isActive(item.href) ? "bg-blue-700 font-semibold" : ""
+                  )}
                   onClick={() => setLoading(true)}
                 >
                   {item.name}
@@ -64,7 +78,10 @@ export default function Navbar() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700 transition duration-150 ease-in-out"
+                className={cn(
+                  "block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700 transition duration-150 ease-in-out",
+                  isActive(item.href) ? "bg-blue-700 font-semibold" : ""
+                )}
                 onClick={() => setLoading(true)}
               >
                 {item.name}

@@ -5,12 +5,13 @@ import { ArrowLeft, Phone, Mail, MapPin, Clock } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useEffect, useState } from "react"
-import { getContacts, addContact, updateContact, deleteContact, ContactInfo } from "@/lib/contact-service"
+import { getContacts, addContact, updateContact, deleteContact, ContactInfo } from "@/app/action/contact-actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
+import { useAuth } from "@/lib/auth-context"
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -34,9 +35,8 @@ const categoryColors = {
   "Health Services": "bg-teal-100 text-teal-800",
 }
 
-const isAdmin = true // TODO: Replace with real admin check
-
 export default function ContactPage() {
+  const { isAdmin } = useAuth()
   const [contacts, setContacts] = useState<ContactInfo[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -96,14 +96,24 @@ export default function ContactPage() {
   async function handleSave() {
     try {
       if (editingContact && editingContact.id) {
-        await updateContact({ ...form, id: editingContact.id })
-        toast({ title: "Contact updated!", description: `${form.name} was updated successfully.` })
+        const result = await updateContact({ ...form, id: editingContact.id })
+        if (result.success) {
+          toast({ title: "Contact updated!", description: `${form.name} was updated successfully.` })
+          setShowDialog(false)
+          fetchContacts()
+        } else {
+          toast({ title: "Error", description: result.error || "Failed to update contact", variant: "destructive" })
+        }
       } else {
-        await addContact(form)
-        toast({ title: "Contact added!", description: `${form.name} was added successfully.` })
+        const result = await addContact(form)
+        if (result.success) {
+          toast({ title: "Contact added!", description: `${form.name} was added successfully.` })
+          setShowDialog(false)
+          fetchContacts()
+        } else {
+          toast({ title: "Error", description: result.error || "Failed to add contact", variant: "destructive" })
+        }
       }
-      setShowDialog(false)
-      fetchContacts()
     } catch (e: any) {
       let msg = e.message || "An error occurred."
       if (msg.includes("fullName")) {
@@ -116,9 +126,13 @@ export default function ContactPage() {
   async function handleDelete(id: number | undefined) {
     if (!id) return
     try {
-      await deleteContact(id)
-      toast({ title: "Contact deleted!", description: `Contact was deleted successfully.` })
-      fetchContacts()
+      const result = await deleteContact(id)
+      if (result.success) {
+        toast({ title: "Contact deleted!", description: `Contact was deleted successfully.` })
+        fetchContacts()
+      } else {
+        toast({ title: "Error", description: result.error || "Failed to delete contact", variant: "destructive" })
+      }
     } catch (e: any) {
       toast({ title: "Error", description: e.message || "An error occurred.", variant: "destructive" })
     }
