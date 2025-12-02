@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   DropdownMenu,
@@ -42,6 +42,8 @@ import {
 } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import jsPDF from "jspdf"
+import html2canvas from "html2canvas"
 
 interface KKRegistration {
   id: string
@@ -78,6 +80,7 @@ export function KKRegistrationsTable() {
   const [barangayFilter, setBarangayFilter] = useState<string>("all")
   const [barangays, setBarangays] = useState<string[]>([])
   const registrationsPerPage = 10
+  const tableRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     fetchRegistrations()
@@ -224,6 +227,39 @@ export function KKRegistrationsTable() {
     } catch (error) {
       console.error("Error exporting registrations:", error)
       toast.error("Failed to export registrations")
+    }
+  }
+
+  const handleExportPDF = async () => {
+    if (!tableRef.current) {
+      toast.error("Table is not ready to export")
+      return
+    }
+
+    try {
+      const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4",
+      })
+
+      const canvas = await html2canvas(tableRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+      })
+
+      const imgData = canvas.toDataURL("image/png")
+      const imgWidth = pdf.internal.pageSize.getWidth()
+      const imgHeight = (canvas.height * imgWidth) / canvas.width
+
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight)
+      pdf.save(`kk_registrations_${format(new Date(), "yyyy-MM-dd")}.pdf`)
+      toast.success("Registrations PDF exported successfully")
+    } catch (error) {
+      console.error("Error exporting registrations PDF:", error)
+      toast.error("Failed to export registrations PDF")
     }
   }
 
@@ -435,6 +471,10 @@ export function KKRegistrationsTable() {
             <Download className="h-4 w-4" />
             Export CSV
           </Button>
+          <Button variant="outline" onClick={handleExportPDF} className="flex items-center gap-2">
+            <Download className="h-4 w-4" />
+            Export PDF
+          </Button>
           <Button variant="outline" onClick={handlePrintTable} className="flex items-center gap-2">
             <Printer className="h-4 w-4" />
             Print
@@ -442,7 +482,7 @@ export function KKRegistrationsTable() {
         </div>
       </div>
 
-      <div className="rounded-md border">
+      <div ref={tableRef} className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>

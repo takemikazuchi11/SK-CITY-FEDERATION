@@ -61,6 +61,9 @@ const formSchema = z.object({
     required_error: "Please select your education level.",
   }),
   reasonForJoining: z.string().min(10, { message: "Please provide a reason with at least 10 characters." }),
+  guardianName: z.string().min(2, { message: "Guardian/emergency contact name is required." }),
+  emergencyContactNumber: z.string().min(10, { message: "Emergency contact number must be at least 10 digits." }),
+  emergencyAddress: z.string().min(5, { message: "Emergency address must be at least 5 characters." }),
   termsAgreed: z.literal(true, {
     errorMap: () => ({ message: "You must agree to the terms and conditions." }),
   }),
@@ -109,7 +112,9 @@ export default function KKRegistrationPage() {
       phone: "",
       address: "",
       reasonForJoining: "",
-      
+      guardianName: "",
+      emergencyContactNumber: "",
+      emergencyAddress: "",
       birthDateInput: "",
     },
   })
@@ -147,6 +152,9 @@ export default function KKRegistrationPage() {
         school_or_work: "", // Simplified form doesn't collect this
         interests: [], // Simplified form doesn't collect this
         reason_for_joining: values.reasonForJoining,
+        guardian_name: values.guardianName,
+        emergency_contact_number: values.emergencyContactNumber,
+        emergency_address: values.emergencyAddress,
         is_registered_voter: false, // Default value
         has_previous_sk_involvement: false, // Default value
         previous_sk_involvement: null,
@@ -577,6 +585,56 @@ export default function KKRegistrationPage() {
                     </FormItem>
                   )}
                 />
+              </div>
+
+              {/* Emergency Contact Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Emergency Contact Information</h3>
+                <p className="text-sm text-gray-600">Please provide information for someone we can contact in case of emergency.</p>
+
+                <FormField
+                  control={form.control}
+                  name="guardianName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Guardian/Emergency Contact Name*</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Maria Dela Cruz" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="emergencyContactNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Emergency Contact Number*</FormLabel>
+                        <FormControl>
+                          <Input type="tel" placeholder="09123456789" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="emergencyAddress"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Emergency Contact Address*</FormLabel>
+                        <FormControl>
+                          <Input placeholder="123 Main St., Calapan City" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
 
               {/* Terms and Consent */}

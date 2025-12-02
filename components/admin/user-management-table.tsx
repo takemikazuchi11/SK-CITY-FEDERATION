@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   DropdownMenu,
@@ -29,6 +29,8 @@ import { format } from "date-fns"
 import { toast } from "sonner"
 import { EditUserModal } from "./edit-user-modal"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import jsPDF from "jspdf"
+import html2canvas from "html2canvas"
 
 interface User {
   id: string
@@ -56,6 +58,7 @@ export function UserManagementTable() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [tableKey, setTableKey] = useState(0)
   const usersPerPage = 10
+  const tableRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     fetchUsers()
@@ -181,6 +184,39 @@ export function UserManagementTable() {
     } catch (error) {
       console.error("Error exporting users:", error)
       toast.error("Failed to export users")
+    }
+  }
+
+  const handleExportPDF = async () => {
+    if (!tableRef.current) {
+      toast.error("Table is not ready to export")
+      return
+    }
+
+    try {
+      const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4",
+      })
+
+      const canvas = await html2canvas(tableRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+      })
+
+      const imgData = canvas.toDataURL("image/png")
+      const imgWidth = pdf.internal.pageSize.getWidth()
+      const imgHeight = (canvas.height * imgWidth) / canvas.width
+
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight)
+      pdf.save(`users_report_${format(new Date(), "yyyy-MM-dd")}.pdf`)
+      toast.success("Users PDF exported successfully")
+    } catch (error) {
+      console.error("Error exporting users PDF:", error)
+      toast.error("Failed to export users PDF")
     }
   }
 
@@ -469,6 +505,10 @@ SK Federation Admin Team`)
             <Download className="h-4 w-4" />
             Export CSV
           </Button>
+          <Button variant="outline" onClick={handleExportPDF} className="flex items-center gap-2">
+            <Download className="h-4 w-4" />
+            Export PDF
+          </Button>
           <Button variant="outline" onClick={handlePrintTable} className="flex items-center gap-2">
             <Printer className="h-4 w-4" />
             Print
@@ -476,7 +516,7 @@ SK Federation Admin Team`)
         </div>
       </div>
 
-      <div className="rounded-md border">
+      <div ref={tableRef} className="rounded-md border">
         <Table key={tableKey}>
           <TableHeader>
             <TableRow>

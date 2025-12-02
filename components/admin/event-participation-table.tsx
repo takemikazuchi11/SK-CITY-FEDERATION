@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,6 +13,8 @@ import { format } from "date-fns"
 import { toast } from "sonner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { EventParticipantsModal } from "./event-participants-modal"
+import jsPDF from "jspdf"
+import html2canvas from "html2canvas"
 
 interface Event {
   id: string
@@ -33,6 +35,7 @@ export function EventParticipationTable() {
   const eventsPerPage = 10
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
   const [showParticipantsModal, setShowParticipantsModal] = useState(false)
+  const tableRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     // Check if event_participants table exists
@@ -197,6 +200,39 @@ export function EventParticipationTable() {
     }
   }
 
+  const handleExportPDF = async () => {
+    if (!tableRef.current) {
+      toast.error("Table is not ready to export")
+      return
+    }
+
+    try {
+      const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4",
+      })
+
+      const canvas = await html2canvas(tableRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+      })
+
+      const imgData = canvas.toDataURL("image/png")
+      const imgWidth = pdf.internal.pageSize.getWidth()
+      const imgHeight = (canvas.height * imgWidth) / canvas.width
+
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight)
+      pdf.save(`event_participation_${format(new Date(), "yyyy-MM-dd")}.pdf`)
+      toast.success("Event participation PDF exported successfully")
+    } catch (error) {
+      console.error("Error exporting event participation PDF:", error)
+      toast.error("Failed to export event participation PDF")
+    }
+  }
+
   const handlePrintTable = () => {
     try {
       // Create a new window for printing
@@ -346,6 +382,10 @@ export function EventParticipationTable() {
             <Download className="h-4 w-4" />
             Export CSV
           </Button>
+          <Button variant="outline" onClick={handleExportPDF} className="flex items-center gap-2">
+            <Download className="h-4 w-4" />
+            Export PDF
+          </Button>
           <Button variant="outline" onClick={handlePrintTable} className="flex items-center gap-2">
             <Printer className="h-4 w-4" />
             Print
@@ -353,7 +393,7 @@ export function EventParticipationTable() {
         </div>
       </div>
 
-      <div className="rounded-md border">
+      <div ref={tableRef} className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>

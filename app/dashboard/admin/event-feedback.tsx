@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
@@ -28,6 +28,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Download, Search, ChevronLeft, ChevronRight, Filter, MoreHorizontal, Trash2, Mail, Printer } from "lucide-react"
 import { toast } from "sonner"
+import jsPDF from "jspdf"
+import html2canvas from "html2canvas"
 
 const feedbackPerPage = 10
 
@@ -43,6 +45,7 @@ export default function EventFeedbackAdminTable() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [feedbackToDelete, setFeedbackToDelete] = useState<any>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const tableRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     fetchEvents()
@@ -174,6 +177,39 @@ SKCF Admin Team`)
       document.body.removeChild(link)
     } catch (error) {
       alert("Failed to export feedback")
+    }
+  }
+
+  async function handleExportPDF() {
+    if (!tableRef.current) {
+      toast.error("Table is not ready to export")
+      return
+    }
+
+    try {
+      const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4",
+      })
+
+      const canvas = await html2canvas(tableRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+      })
+
+      const imgData = canvas.toDataURL("image/png")
+      const imgWidth = pdf.internal.pageSize.getWidth()
+      const imgHeight = (canvas.height * imgWidth) / canvas.width
+
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight)
+      pdf.save(`event_feedback_${new Date().toISOString().slice(0, 10)}.pdf`)
+      toast.success("Event feedback PDF exported successfully")
+    } catch (error) {
+      console.error("Error exporting feedback PDF:", error)
+      toast.error("Failed to export feedback PDF")
     }
   }
 
@@ -339,17 +375,21 @@ SKCF Admin Team`)
                   ))}
                 </SelectContent>
               </Select>
-                        <Button variant="outline" onClick={handleExportCSV} className="flex items-center gap-2">
-            <Download className="h-4 w-4" />
-            Export CSV
-          </Button>
-          <Button variant="outline" onClick={handlePrintTable} className="flex items-center gap-2">
-            <Printer className="h-4 w-4" />
-            Print
-          </Button>
+              <Button variant="outline" onClick={handleExportCSV} className="flex items-center gap-2">
+                <Download className="h-4 w-4" />
+                Export CSV
+              </Button>
+              <Button variant="outline" onClick={handleExportPDF} className="flex items-center gap-2">
+                <Download className="h-4 w-4" />
+                Export PDF
+              </Button>
+              <Button variant="outline" onClick={handlePrintTable} className="flex items-center gap-2">
+                <Printer className="h-4 w-4" />
+                Print
+              </Button>
             </div>
           </div>
-          <div className="rounded-md border">
+          <div ref={tableRef} className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>

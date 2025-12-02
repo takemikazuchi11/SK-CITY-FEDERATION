@@ -1,0 +1,224 @@
+// KK ID Card Component
+// Dependencies needed: date-fns, shadcn/ui Card component
+// Assets needed: sk-balite-logo.png, als-logo.jpg, daviesca-logo.png, kk-id-bg.png, viesca-signature.png
+
+import { Card } from "@/components/ui/card";
+import skBaliteLogo from "@/assets/sk-balite-logo.png";
+import alsLogo from "@/assets/als-logo.jpg";
+import daviescaLogo from "@/assets/daviesca-logo.png";
+import kkIdBg from "@/assets/kk-id-bg.png";
+import viescaSignature from "@/assets/viesca-signature.png";
+import { format } from "date-fns";
+
+interface KKIDCardProps {
+  registration: {
+    first_name: string;
+    middle_name?: string;
+    last_name: string;
+    sitio?: string;
+    birthdate: string;
+    sex?: string;
+    contact_number?: string;
+    date_issued?: string;
+    kk_id_number?: string;
+    full_name: string;
+    address: string;
+    guardian_name?: string;
+  };
+  photoUrl?: string;
+}
+
+export const KKIDCard = ({
+  registration,
+  photoUrl
+}: KKIDCardProps) => {
+  return (
+    <div className="space-y-8">
+      {/* Front of ID Card */}
+      <Card className="w-full max-w-4xl mx-auto overflow-hidden bg-white shadow-lg">
+        <div className="relative">
+          {/* Header with green background */}
+          <div className="bg-[#1a5f3c] text-white px-6 py-1 flex items-center justify-between">
+            <div className="flex items-center gap-0">
+              <img src={skBaliteLogo} alt="SK Logo" className="h-20 w-20 object-contain" />
+              <img alt="Barangay Logo" className="h-20 w-20 object-contain" src="/lovable-uploads/2d1af5a1-9bdf-4ac8-a083-f90a45ffa4f2.png" />
+            </div>
+            <div className="text-center flex-1">
+              <p className="text-base font-normal text-left">Republic of the Philippines</p>
+              <h2 className="text-3xl font-bold tracking-wider text-left">SANGGUNIANG KABATAAN</h2>
+              <p className="text-sm text-left">Brgy. Balite, Calapan City, Oriental Mindoro</p>
+            </div>
+            <div className="w-44">
+              <img src={daviescaLogo} alt="DaViesca Logo" className="h-28 w-auto object-contain" />
+            </div>
+          </div>
+
+          {/* ID Content with background */}
+          <div className="relative bg-gray-50 p-8" style={{
+            backgroundImage: `url(${kkIdBg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}>
+            {/* Title */}
+            <h3 className="font-black text-[#1a5f3c] mb-6 tracking-wide text-3xl">
+              KATIPUNAN NG KABATAAN IDENTIFICATION CARD
+            </h3>
+
+            <div className="flex gap-8">
+              {/* Photo */}
+              <div className="flex-shrink-0">
+                <div className="w-56 h-64 border-[6px] border-[#1a5f3c] rounded-3xl bg-white flex items-center justify-center overflow-hidden">
+                  {photoUrl ? (
+                    <img src={photoUrl} alt={registration.full_name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-gray-400 text-sm text-center">Photo<br />Placeholder</span>
+                  )}
+                </div>
+                
+                {/* KK ID No */}
+                <div className="mt-6">
+                  <p className="text-base text-gray-900 font-normal">KK ID No:</p>
+                  <p className="font-bold text-[#1a5f3c] mt-1 text-4xl">{registration.kk_id_number || 'PENDING'}</p>
+                </div>
+              </div>
+
+              {/* ID Details */}
+              <div className="flex-1 space-y-4">
+                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                  <div>
+                    <p className="text-sm text-gray-900 font-normal">Last Name</p>
+                    <p className="font-bold text-gray-900 mt-1 my-[6px] text-3xl">{registration.last_name?.toUpperCase()}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-900 font-normal">First Name</p>
+                    <p className="font-bold text-gray-900 mt-1 text-3xl">{registration.first_name?.toUpperCase()}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm text-gray-900 font-normal">Middle Name</p>
+                  <p className="font-bold text-gray-900 mt-1 text-3xl">{registration.middle_name?.toUpperCase() || 'N/A'}</p>
+                </div>
+
+                <div className="grid grid-cols-3 gap-x-8 gap-y-4">
+                  <div>
+                    <p className="text-sm text-gray-900 font-normal">Sitio</p>
+                    <p className="font-bold text-gray-900 mt-1 text-3xl">{registration.sitio?.toUpperCase() || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-900 font-normal">Birthdate</p>
+                    <p className="font-bold text-gray-900 mt-1 text-3xl">
+                      {format(new Date(registration.birthdate), 'MM/dd/yyyy')}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-900 font-normal">Sex Assigned on Birth</p>
+                    <p className="font-bold text-gray-900 mt-1 text-3xl">{registration.sex?.toUpperCase() || 'N/A'}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                  <div>
+                    <p className="text-sm text-gray-900 font-normal">Contact Number</p>
+                    <p className="font-bold text-gray-900 mt-1 text-3xl">{registration.contact_number}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-900 font-normal">Date Issued</p>
+                    <p className="font-bold text-gray-900 mt-1 text-3xl">
+                      {registration.date_issued ? format(new Date(registration.date_issued), 'MM/dd/yyyy') : format(new Date(), 'MM/dd/yyyy')}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-6 flex justify-end">
+                  <div className="text-center">
+                    <div className="w-48 border-b-2 border-gray-900 mb-1"></div>
+                    <p className="text-sm font-semibold text-gray-900">Signature</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="bg-[#1a5f3c] h-4"></div>
+        </div>
+      </Card>
+
+      {/* Back of ID Card */}
+      <Card className="w-full max-w-4xl mx-auto overflow-hidden bg-white shadow-lg">
+        <div className="relative">
+          {/* Header */}
+          <div className="bg-[#1a5f3c] text-white px-6 py-1 flex items-center justify-between">
+            <div className="flex items-center gap-0">
+              <img src={skBaliteLogo} alt="SK Logo" className="h-20 w-20 object-contain" />
+              <img alt="Barangay Logo" src="/lovable-uploads/35f05112-5671-4b50-b3bf-4056352a37be.png" className="h-20 w-20 object-contain" />
+            </div>
+            <div className="text-center flex-1">
+              <p className="text-base font-normal text-left">Republika ng Pilipinas</p>
+              <h3 className="font-bold tracking-wider text-left text-3xl">SANGGUNIANG KABATAAN</h3>
+              <p className="text-sm text-left">Brgy. Balite, Calapan City, Oriental Mindoro</p>
+            </div>
+            <div className="w-44">
+              <img src={daviescaLogo} alt="DaViesca Logo" className="h-28 w-auto object-contain" />
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="p-8">
+            <div className="grid md:grid-cols-[300px_1px_1fr] gap-8 items-start">
+              {/* Left: Emergency Contact */}
+              <div className="space-y-4">
+                <p className="text-sm font-semibold text-gray-900">In case of emergencies, please contact</p>
+                
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-sm text-gray-900 font-normal">Name</p>
+                    <p className="mt-1 font-bold text-3xl">{registration.guardian_name || ''}</p>
+                  </div>
+                  
+                  <div>
+                    <p className="text-sm text-gray-900 font-normal">Contact Number</p>
+                    <p className="mt-1 text-3xl font-bold">{registration.contact_number || ''}</p>
+                  </div>
+                  
+                  <div>
+                    <p className="text-sm text-gray-900 font-normal">Address</p>
+                    <p className="mt-1 text-3xl">{registration.address || ''}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Vertical divider */}
+              <div className="hidden md:block h-full border-l-2 border-gray-300"></div>
+
+              {/* Right: Terms and Conditions */}
+              <div>
+                <h4 className="text-xl font-black text-center mb-4 text-gray-900">TERMS AND CONDITIONS</h4>
+                <ol className="text-xs space-y-2 list-decimal list-outside pl-4 text-gray-900 leading-relaxed text-justify">
+                  <li>Every holder of the Katipunan ng Kabataan (KK) ID is entitled to specific privileges and benefits for designated projects, programs, and activities organized by the Sangguniang Kabataan (SK) of Barangay Balite, Calapan City, Oriental Mindoro.</li>
+                  <li>The KK ID serves as proof of identity within the territorial jurisdiction of Barangay Balite but is not recognized as a valid government-issued ID.</li>
+                  <li>The ID is non-transferable and may only be utilized by the designated holder. Therefore, it cannot be shared or used by any other individual to access youth-related activities within the barangay.</li>
+                  <li>The SK Officials retain the right to revoke or replace the ID in instances of misuse, damage, or failure to comply with the stipulated terms and conditions for its usage.</li>
+                  <li>It is imperative to carry the ID at all times during KK assemblies or any KK events for identification purposes.</li>
+                  <li>In the event of card loss, please notify the Sangguniang Kabataan of Barangay Balite and request a replacement.</li>
+                </ol>
+              </div>
+            </div>
+
+            {/* Signature Section */}
+            <div className="mt-8 text-center relative">
+              <img src={viescaSignature} alt="Signature" className="h-40 w-auto mx-auto absolute left-[42%] top--5 -translate-x-1/2 -translate-y-1/2 z-0 opacity-100" />
+              <p className="text-xl font-black text-gray-900 relative z-10">HON. JOHN LYNARD A. VIESCA</p>
+              <p className="text-base font-normal text-gray-900 relative z-10">SK Chairperson</p>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="bg-[#1a5f3c] h-4"></div>
+        </div>
+      </Card>
+    </div>
+  );
+};
