@@ -42,49 +42,51 @@ const carouselImages = [
   },
 ]
 
-// PYDP hexagon images
+// PYDP hexagon images (served from local public folder)
 const pydpIcons = [
   {
-    src: "https://nyc-sk.com/assets/img/pydp-logos/active_citizenship.png",
+    src: "/active_citizenship.png",
     alt: "Active Citizenship",
   },
   {
-    src: "https://nyc-sk.com/assets/img/pydp-logos/economic_empowerment.png",
+    src: "/economic_empowerment-.png",
     alt: "Economic Empowerment",
   },
   {
-    src: "https://nyc-sk.com/assets/img/pydp-logos/education.png",
+    src: "/education.png",
     alt: "Education",
   },
   {
-    src: "https://nyc-sk.com/assets/img/pydp-logos/environment.png",
+    src: "/environment.png",
     alt: "Environment",
   },
 ]
 
 const pydpIconsRow2 = [
   {
-    src: "https://nyc-sk.com/assets/img/pydp-logos/global_mobility.png",
+    src: "/global_mobility.png",
     alt: "Global Mobility",
   },
   {
-    src: "https://nyc-sk.com/assets/img/pydp-logos/governance.png",
+    src: "/governance-.png",
     alt: "Governance",
   },
   {
-    src: "https://nyc-sk.com/assets/img/pydp-logos/health.png",
+    src: "/Health.png",
     alt: "Health",
   },
   {
-    src: "https://nyc-sk.com/assets/img/pydp-logos/peace_building_and_security.png",
+    src: "/peace_building_and_security.png",
     alt: "Peace Building and Security",
   },
+  //{
+    // No dedicated icon file was provided for this,
+    // so we fall back to a generic placeholder image from public.
+   // src: "/placeholder.jpg",
+   // alt: "Social Inclusion and Equity",
+ // },
   {
-    src: "https://nyc-sk.com/assets/img/pydp-logos/social_inclusion_and_equity.png",
-    alt: "Social Inclusion and Equity",
-  },
-  {
-    src: "https://nyc-sk.com/assets/img/pydp-logos/agriculture.png",
+    src: "/agriculture.png",
     alt: "Agriculture",
   },
 ]
@@ -425,11 +427,7 @@ export default function Dashboard() {
             {/* Logo and Title Column */}
             <div className="mb-8 w-full p-0 lg:mb-0 lg:w-1/3">
               <div className="flex flex-col items-center justify-center md:flex-row lg:items-start">
-                <img
-                  src="https://nyc-sk.com/assets/img/pydp-logos/pydp_logo.png"
-                  alt="PYDP Logo"
-                  className="h-auto w-24 md:w-32"
-                />
+                <img src="/pydp_logo.png" alt="PYDP Logo" className="h-auto w-24 md:w-32" />
                 <div className="mt-4 text-center md:mt-0 md:text-left">
                   <h3 className="mb-0 text-2xl font-bold leading-tight text-black">
                     Philippine <br />
