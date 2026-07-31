@@ -288,11 +288,16 @@ const KKIDCard = ({
             </div>
 
             {/* Signature Section */}
-            <div className="mt-8 text-center relative">
-              {/* TODO: Replace with actual signature image when available */}
-              {/* <img src="/viesca-signature.png" alt="Signature" className="h-40 w-auto mx-auto absolute left-[42%] top--5 -translate-x-1/2 -translate-y-1/2 z-0 opacity-100" /> */}
-              <p className="text-xl font-black text-gray-900 relative z-10">HON. DEO P. LOPEZ</p>
-              <p className="text-base font-normal text-gray-900 relative z-10">SK PRESIDENT/EX-OFFICIO SP MEMBER</p>
+            <div className="mt-8 text-center">
+              <div className="inline-flex flex-col items-center">
+                <img
+                  src="/deo-signature.svg"
+                  alt="Signature of HON. DEO P. LOPEZ"
+                  className="h-20 w-auto max-w-[280px] object-contain"
+                />
+                <p className="text-xl font-black text-gray-900 -mt-11">HON. DEO P. LOPEZ</p>
+                <p className="text-base font-normal text-gray-900">SK PRESIDENT/EX-OFFICIO SP MEMBER</p>
+              </div>
             </div>
           </div>
 

@@ -14,17 +14,18 @@ export default function KatipunanNgKabataanPage() {
   const supabase = createClientComponentClient()
 
   // Sample KK group names for the carousel
-  const kkGroups = [
-    "Aletheians Debate Society",
-"Anak ng Teatro",                   
-"City College of Calapan- Student Parliament",          
-"ALA-GAD Advocates",
-"Oriental Mindoro Youth Leaders CCC",
-"Division Federated Supreme Secondary Learner Government - Calapan City",
-"ORIENTAL MINDORO NATIONAL HIGH SCHOOL - SSLG",
-"Rotaract Club of Calapan", 
-"Scinatics Organization - CCC",
-  ]
+ const kkGroups = [
+  "Anak ng Teatro",
+  "Student Parliament City College of Calapan",
+  "Supreme Student Government Oriental Mindoro National High School",
+  "Ala-GAD Advocates",
+  "4H Club Calapan City Federation",
+  "Aletheians Debate Society",
+  "Oriental Mindoro Youth Leaders City College of Calapan",
+  "Rotaract Club of Calapan",
+  "Division Federation of Supreme Secondary Learner Government - Calapan City",
+  "Scinatics Organization CCC",
+]
 
   // Animation effect for the carousel
   useEffect(() => {

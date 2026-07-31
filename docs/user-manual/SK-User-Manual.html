@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SK Calapan City Federation — User Manual</title>
+  <style>
+    body {
+      font-family: Calibri, "Segoe UI", Arial, sans-serif;
+      line-height: 1.5;
+      color: #1e293b;
+      max-width: 8.5in;
+      margin: 0 auto;
+      padding: 0.75in;
+    }
+    h1 { color: #2563eb; font-size: 28pt; border-bottom: 3px solid #2563eb; padding-bottom: 8px; }
+    h2 { color: #2563eb; font-size: 18pt; margin-top: 28px; page-break-before: always; }
+    h2:first-of-type { page-break-before: avoid; }
+    h3 { color: #0f172a; font-size: 14pt; margin-top: 20px; }
+    p, li { font-size: 11pt; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+    th, td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: left; font-size: 10.5pt; }
+    th { background: #eff6ff; color: #1e40af; }
+    .cover { text-align: center; padding: 2in 0; page-break-after: always; }
+    .cover h1 { border: none; font-size: 32pt; }
+    .cover p { font-size: 14pt; color: #64748b; }
+    .screenshot-box {
+      border: 2px dashed #94a3b8;
+      background: #f8fafc;
+      color: #64748b;
+      padding: 40px 20px;
+      text-align: center;
+      margin: 16px 0;
+      font-style: italic;
+      min-height: 120px;
+    }
+    .tip { background: #eff6ff; border-left: 4px solid #2563eb; padding: 10px 14px; margin: 12px 0; font-size: 10.5pt; }
+    .admin-only { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 10px 14px; margin: 12px 0; font-size: 10.5pt; }
+    ol.steps { padding-left: 22px; }
+    ol.steps li { margin-bottom: 6px; }
+    .toc a { color: #2563eb; text-decoration: none; }
+    .footer { margin-top: 40px; text-align: center; color: #64748b; font-size: 10pt; border-top: 1px solid #e2e8f0; padding-top: 16px; }
+    @media print {
+      h2 { page-break-before: always; }
+      .no-break { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cover">
+    <h1>SK Calapan City Federation</h1>
+    <p><strong>Website User Manual</strong></p>
+    <p>Basic Guide for Users &amp; Administrators</p>
+    <p style="margin-top: 40px; font-size: 11pt;">English · Editable in Microsoft Word</p>
+    <p style="font-size: 10pt;">Replace gray screenshot boxes with your own images</p>
+  </div>
+
+  <h2>Table of Contents</h2>
+  <ol class="toc">
+    <li><a href="#intro">Introduction</a></li>
+    <li><a href="#getting-started">Getting Started</a></li>
+    <li><a href="#navigation">Dashboard &amp; Navigation</a></li>
+    <li><a href="#user-guide">User Guide</a></li>
+    <li><a href="#admin-guide">Admin Guide</a></li>
+    <li><a href="#faq">FAQ &amp; Support</a></li>
+  </ol>
+
+  <h2 id="intro">1. Introduction</h2>
+  <h3>About This Website</h3>
+  <p>The <strong>SK Calapan City Federation</strong> website is the official online platform for youth programs, announcements, events, and transparency documents in Calapan City.</p>
+  <table>
+    <tr><th>Role</th><th>What you can do</th></tr>
+    <tr><td>User (Youth member)</td><td>Browse content, register for events, manage account, download KK ID Card</td></tr>
+    <tr><td>Editor</td><td>Create announcements and events, upload resources</td></tr>
+    <tr><td>Moderator</td><td>Manage barangay-specific content and resources</td></tr>
+    <tr><td>Admin</td><td>Full platform management — users, events, disclosure, analytics</td></tr>
+  </table>
+  <div class="screenshot-box">[ INSERT SCREENSHOT: Dashboard home page ]<br><small>Right-click → Replace image, or delete this box and Insert → Pictures</small></div>
+
+  <h2 id="getting-started">2. Getting Started</h2>
+
+  <h3>2.1 Creating an Account</h3>
+  <ol class="steps">
+    <li>Open the website and go to <strong>Login</strong> (<code>/login</code>).</li>
+    <li>Select the <strong>Register</strong> tab.</li>
+    <li>Enter first name, last name, email, password, and barangay.</li>
+    <li>Click <strong>Register</strong>, then sign in with your credentials.</li>
+  </ol>
+  <div class="tip">You can also use <strong>Sign in with Google</strong> if enabled.</div>
+  <div class="screenshot-box">[ INSERT SCREENSHOT: Register tab on login page ]</div>
+
+  <h3>2.2 Signing In &amp; Out</h3>
+  <ol class="steps">
+    <li>Go to <strong>Login</strong> and enter email and password.</li>
+    <li>Click <strong>Sign in</strong>.</li>
+    <li>To sign out: click your profile avatar (top-right) → <strong>Logout</strong>.</li>
+  </ol>
+  <div class="screenshot-box">[ INSERT SCREENSHOT: Login page and profile menu ]</div>
+
+  <h2 id="navigation">3. Dashboard &amp; Navigation</h2>
+
+  <h3>3.1 Top Navigation Bar</h3>
+  <table>
+    <tr><th>Menu</th><th>Contents</th></tr>
+    <tr><td>Home</td><td>Dashboard — announcements, events, news, disclosure board</td></tr>
+    <tr><td>About</td><td>Vision/mission, SK history, officers, barangay officials</td></tr>
+    <tr><td>Programs</td><td>CYDC, Katipunan ng Kabataan (KK), Events</td></tr>
+    <tr><td>Process</td><td>BIR filing, COA report, EFPS, disclosure, and related guides</td></tr>
+    <tr><td>Resources</td><td>Downloadable documents</td></tr>
+    <tr><td>Contact Us</td><td>Contact the SK Federation</td></tr>
+  </table>
+  <div class="screenshot-box">[ INSERT SCREENSHOT: Top navigation bar ]</div>
+
+  <h3>3.2 Profile Menu</h3>
+  <table>
+    <tr><th>Menu Item</th><th>Purpose</th></tr>
+    <tr><td>KK ID Card</td><td>View and download your Katipunan ng Kabataan ID</td></tr>
+    <tr><td>Account Settings</td><td>Update profile, photo, password</td></tr>
+    <tr><td>My Events</td><td>Events you registered for</td></tr>
+    <tr><td>Notifications</td><td>Alerts and updates</td></tr>
+    <tr><td>Support &amp; Help</td><td>FAQs and contact the dev team</td></tr>
+  </table>
+  <div class="screenshot-box">[ INSERT SCREENSHOT: Profile sidebar menu ]</div>
+
+  <h2 id="user-guide">4. User Guide</h2>
+
+  <h3>4.1 Announcements &amp; News</h3>
+  <ul>
+    <li>Announcements appear on the dashboard home page.</li>
+    <li>Click an announcement to read full details.</li>
+    <li>Some announcements include polls — vote when available.</li>
+    <li>News articles are in the news section; click to read more.</li>
+  </ul>
+  <div class="screenshot-box">[ INSERT SCREENSHOT: Announcements on dashboard ]</div>
+
+  <h3>4.2 Events</h3>
+  <p><strong>Browse:</strong> Programs → Events → click an event for details.</p>
+  <p><strong>Register:</strong> Open event page → click <strong>Register</strong> (sign in required).</p>
+  <p><strong>Track:</strong> Profile menu → <strong>My Events</strong>.</p>
+  <div class="screenshot-box">[ INSERT SCREENSHOT: Events list and event detail page ]</div>
+
+  <h3>4.3 KK ID Card</h3>
+  <ol class="steps">
+    <li>Profile menu → <strong>KK ID Card</strong>.</li>
+    <li>Complete KK registration if prompted.</li>
+    <li>Click <strong>Download</strong> to save as PDF.</li>
+  </ol>
+  <div class="screenshot-box">[ INSERT SCREENSHOT: KK ID Card page ]</div>
+
+  <h3>4.4 Account Settings</h3>
+  <p>Profile menu → <strong>Account Settings</strong> → update info, photo, or password → save.</p>
+  <div class="screenshot-box">[ INSERT SCREENSHOT: Account Settings page ]</div>
+
+  <h3>4.5 Resources &amp; Transparency</h3>
+  <ul>
+    <li><strong>Resources</strong> — browse and download federation files.</li>
+    <li><strong>Disclosure Board</strong> — quarterly financial reports on the dashboard.</li>
+    <li><strong>Process pages</strong> — compliance guides (BIR, COA, EFPS, etc.).</li>
+    <li><strong>Chatbot</strong> — quick help on the dashboard.</li>
+  </ul>
+  <div class="screenshot-box">[ INSERT SCREENSHOT: Resources and disclosure board ]</div>
+
+  <h2 id="admin-guide">5. Admin Guide</h2>
+  <div class="admin-only"><strong>Admin only:</strong> These features require an account with the <em>admin</em> role. Admin links appear at the top of the profile menu.</div>
+
+  <h3>5.1 Admin Dashboard</h3>
+  <p><strong>Path:</strong> Profile menu → Admin Dashboard (<code>/dashboard/admin</code>)</p>
+  <ul>
+    <li>Platform stats: users, events, announcements, KK registrations.</li>
+    <li>Tabs: User Management, Event Participation, KK Registrations.</li>
+    <li>Analytics charts and event feedback review.</li>
+  </ul>
+  <div class="screenshot-box">[ INSERT SCREENSHOT: Admin Dashboard ]</div>
+
+  <h3>5.2 Creating Announcements</h3>
+  <ol class="steps">
+    <li>Profile menu → <strong>Create Announcement</strong>.</li>
+    <li>Enter title, content, category, optional image, and visibility dates.</li>
+    <li>Publish. For polls: <strong>Create Poll Announcement</strong>.</li>
+  </ol>
+  <div class="screenshot-box">[ INSERT SCREENSHOT: Create Announcement form ]</div>
+
+  <h3>5.3 Creating Events</h3>
+  <ol class="steps">
+    <li>Profile menu → <strong>Create Event</strong>.</li>
+    <li>Fill in title, date, time, location, description, image.</li>
+    <li>Track sign-ups in Admin Dashboard → Event Participation.</li>
+  </ol>
+  <div class="screenshot-box">[ INSERT SCREENSHOT: Create Event form ]</div>
+
+  <h3>5.4 Disclosure &amp; User Management</h3>
+  <ul>
+    <li><strong>Add Files SKCF</strong> — upload quarterly disclosure documents.</li>
+    <li><strong>User Management</strong> — view and update user roles.</li>
+    <li><strong>Moderator Logs</strong> — review moderator activity (admin only).</li>
+  </ul>
+  <div class="screenshot-box">[ INSERT SCREENSHOT: Disclosure management and user table ]</div>
+
+  <h2 id="faq">6. FAQ &amp; Support</h2>
+
+  <h3>Frequently Asked Questions</h3>
+  <table>
+    <tr><th>Question</th><th>Answer</th></tr>
+    <tr><td>How do I register for events?</td><td>Programs → Events → open event → Register</td></tr>
+    <tr><td>How do I update my profile?</td><td>Profile menu → Account Settings</td></tr>
+    <tr><td>Not receiving notifications?</td><td>Check account settings; contact Support if needed</td></tr>
+    <tr><td>How do I get my KK ID Card?</td><td>Complete KK registration → KK ID Card in profile menu</td></tr>
+    <tr><td>How do I suggest features?</td><td>Support &amp; Help → Contact Development Team</td></tr>
+  </table>
+
+  <h3>Support &amp; Help</h3>
+  <p><strong>Path:</strong> <code>/dashboard/support</code></p>
+  <p>Email the development team from the page. Typical response: <strong>24–48 hours</strong>.</p>
+  <ul>
+    <li>Justin Goyena — Lead Developer</li>
+    <li>Rose Ericka Leynes — Developer</li>
+    <li>Charles Masangkay — Developer</li>
+  </ul>
+  <div class="screenshot-box">[ INSERT SCREENSHOT: Support &amp; Help page ]</div>
+
+  <div class="footer">
+    SK Calapan City Federation — Youth. Service. Progress.
+  </div>
+
+</body>
+</html>
